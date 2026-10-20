@@ -198,7 +198,7 @@ for (const [program, collect] of Object.entries({ bonus, maximum, world, axess, 
     throw new Error(`${program} sync failed: ${error.message}`);
   }
 }
-const feed = { updatedAt: today, counts, campaigns: all };
+const feed = { updatedAt: new Date().toISOString(), counts, campaigns: all };
 await writeFile(
   new URL("../public/campaign-feed.json", import.meta.url),
   `${JSON.stringify(feed, null, 2)}\n`,
