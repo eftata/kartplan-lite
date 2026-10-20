@@ -6,6 +6,8 @@ import { formatBps, formatKurus } from "../lib/money";
 import type { Campaign, CatalogCard } from "../lib/types";
 
 export function rewardText(c: Campaign): string {
+  if (c.repeatReward)
+    return `Her uygun işleme ${formatKurus(c.rewardKurus)} · en fazla ${formatKurus(c.capKurus)}`;
   if (c.rewardKind === "sabit") return formatKurus(c.rewardKurus);
   return `${formatBps(c.rateBps)}${c.capKurus > 0 ? ` · en fazla ${formatKurus(c.capKurus)}` : ""}`;
 }

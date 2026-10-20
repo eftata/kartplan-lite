@@ -32,6 +32,13 @@ export type Campaign = {
   /** Kampanya döneminde bu karttan en az bu kadar harcama (kuruş). */
   minSpendKurus: number;
   rewardKind: "sabit" | "oran";
+  repeatReward?: boolean;
+  /** Tekrar modelinde ilk kaç uygun işlem ödülsüz. */
+  skipTransactions?: number;
+  participationFeeKurus?: number;
+  calculationGroup?: string;
+  planningOnly?: boolean;
+  reviewedAt?: string;
   /** sabit: eşiğe ulaşınca kazanılan tutar. */
   rewardKurus: number;
   /** oran: harcamanın yüzdesi (bps), capKurus üst limit (0 = limitsiz). */

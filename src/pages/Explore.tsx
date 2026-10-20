@@ -53,6 +53,7 @@ export function Explore() {
       (campaign) =>
         campaign.status === "yayinda" &&
         !campaign.demo &&
+        !campaign.planningOnly &&
         campaign.startsAt <= today &&
         campaign.endsAt >= today,
     )

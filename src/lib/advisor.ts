@@ -1,7 +1,7 @@
 // Tek alışveriş: "Bu tutarı bu kategoride hangi kartla ödemeliyim?" Hiçbir şey kaydetmez.
 
 import { applyBps } from "./money";
-import { campaignReward, eligibleCards } from "./optimizer";
+import { baseRate, campaignReward, eligibleCards } from "./optimizer";
 import type { Campaign, CatalogCard, CategorySlug } from "./types";
 
 export type AdviceCampaign = {
@@ -37,11 +37,11 @@ export function advise(input: {
   );
   return input.cards
     .map((card) => {
-      const baseKurus = applyBps(amountKurus, card.baseRateBps);
+      const baseKurus = applyBps(amountKurus, baseRate(card));
       const campaigns = active
         .filter((c) => eligibleCards(c, [card]).length > 0)
         .map((c) => {
-          const rewardKurus = campaignReward(c, amountKurus);
+          const rewardKurus = c.planningOnly ? 0 : campaignReward(c, amountKurus);
           return {
             campaign: c,
             rewardKurus,

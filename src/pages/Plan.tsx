@@ -5,14 +5,26 @@ import { categoryIcon, categoryName } from "../lib/categories";
 import { setJoined } from "../lib/data";
 import { daysBetween, formatDay, monthName } from "../lib/dates";
 import { formatKurus } from "../lib/money";
-import { bestSingleCard, optimize } from "../lib/optimizer";
+import { bestSingleCard, eligibleCards, isActiveThisMonth, optimize } from "../lib/optimizer";
 import { Link } from "../lib/router";
 import { useSession } from "../lib/store";
 import type { CategorySlug } from "../lib/types";
 
 export function Plan() {
-  const { user, profile, myCards, campaigns, today, catalog } = useSession();
-  const input = { cards: myCards, spend: profile.spend, campaigns, joined: profile.joined, today };
+  const { user, profile, myCards, planCampaigns: campaigns, today, catalog } = useSession();
+  const applicable = campaigns.filter(
+    (c) => !c.demo && isActiveThisMonth(c, today) && eligibleCards(c, myCards).length > 0,
+  );
+  const uncovered = myCards.filter(
+    (card) => !applicable.some((c) => eligibleCards(c, [card]).length > 0),
+  );
+  const input = {
+    cards: myCards,
+    spend: profile.spend,
+    campaigns: campaigns.filter((c) => !c.demo),
+    joined: profile.joined,
+    today,
+  };
   const plan = optimize(input);
   const single = bestSingleCard(input);
   const cardById = (id: string) => catalog.find((c) => c.id === id);
@@ -46,9 +58,29 @@ export function Plan() {
         {new Set(plan.lines.map((l) => l.cardId)).size} karta dağıttık.
       </PageHead>
 
+      <div className="plan-input-summary">
+        <span>
+          <b>{myCards.length}</b> kayıtlı kart
+        </span>
+        <span>
+          <b>{Object.values(profile.spend).filter((v) => v && v > 0).length}</b> harcama kategorisi
+        </span>
+        <span>
+          <b>{applicable.length}</b> hesaplanabilir kampanya
+        </span>
+        <Link href="/kartlarim">Kartları düzenle ↗</Link>
+        <Link href="/harcama">Harcamaları düzenle ↗</Link>
+      </div>
+      {plan.totalSpendKurus === 0 && (
+        <div className="callout">
+          <h2>Kaydedilmiş harcama bulunamadı</h2>
+          <p>Harcama profilini girip Kaydet düğmesine bas. Plan kaydedilen tutarları kullanır.</p>
+          <Link href="/harcama">Harcama ekle ↗</Link>
+        </div>
+      )}
       <section className="summary">
         <div className="summary-main">
-          <span className="kicker">Beklenen kazanç</span>
+          <span className="kicker">Koşullu net kazanç tahmini</span>
           <strong className="big num">{formatKurus(plan.totalKurus)}</strong>
           <span className="muted small">
             Kampanyalardan {formatKurus(plan.campaignKurus)} · temel puandan{" "}
@@ -56,7 +88,7 @@ export function Plan() {
           </span>
         </div>
         <div className="summary-side">
-          <span className="kicker">Tek kartla ödeseydin</span>
+          <span className="kicker">En iyi tek kart senaryosu</span>
           <strong className="num">{formatKurus(single?.totalKurus ?? 0)}</strong>
           <span className="muted small">
             {single && cardById(single.cardId)?.name}
@@ -68,6 +100,28 @@ export function Plan() {
             )}
           </span>
         </div>
+      </section>
+
+      <section className="callout callout-soft">
+        <h2>Bu tutar nasıl hesaplandı?</h2>
+        <p className="small">
+          Aylık bütçenin kampanyadaki işlem tutarı ve ayrı gün koşullarına uygun alışverişlere
+          bölündüğü varsayılır. Henüz yapılan işlemleri, mağazayı veya banka katılımını
+          doğrulamıyoruz. Tutar, bu koşulları uygulayabilirsen elde edebileceğin net puan/iade
+          tahminidir.
+        </p>
+        <p className="small">
+          Katılım ücretleri düşülür; QR ve mobil ödeme ek ödülleri dahil edilmez. Birlikte
+          kullanılabildiği doğrulanmayan aynı program ve sektör kampanyalarından yalnızca en yüksek
+          kazanç sayılır. Bu yöntem tüm olası dağılımların en iyisini garanti etmez.
+        </p>
+        {uncovered.length > 0 && (
+          <p className="small">
+            <b>Hesaplama kapsamı dışında:</b> {uncovered.map((c) => c.name).join(", ")}. Bu kartlar
+            için doğrulanmış hesaplama kuralı yok; sıfır görünmesi kampanyalarının olmadığı anlamına
+            gelmez.
+          </p>
+        )}
       </section>
 
       {toJoin.length > 0 && (
@@ -119,7 +173,7 @@ export function Plan() {
                   <CardLabel card={cardById(l.cardId)} />
                   <div className="plan-line-camps">
                     {hits.length === 0 ? (
-                      <span className="muted small">Temel kazanç</span>
+                      <span className="muted small">Kazanç farkı doğrulanamadı</span>
                     ) : (
                       hits.map((o) => (
                         <span key={o.campaign.id} className="tag tag-plan">
@@ -138,13 +192,17 @@ export function Plan() {
 
       {plan.nearMisses.length > 0 && (
         <section className="callout callout-soft">
-          <h2>Az kaldı</h2>
+          <h2>Alternatif kampanya eşikleri</h2>
+          <p className="muted small">
+            Bu alternatifler yukarıdaki kazanca eklenmez. Sırf ödül için bütçeni artırma; işlem ve
+            katılım koşulları ayrıca geçerlidir.
+          </p>
           <ul className="near-list">
             {plan.nearMisses.map((n) => (
               <li key={n.campaign.id}>
                 <span>
-                  {cardById(n.cardId)?.name} ile <b>{formatKurus(n.missingKurus)}</b> daha harcarsan{" "}
-                  <b className="pos">{formatKurus(n.rewardKurus)}</b> kazanırsın
+                  {cardById(n.cardId)?.name} için bütçe eksiği: <b>{formatKurus(n.missingKurus)}</b>{" "}
+                  · koşullu net ödül: <b className="pos">{formatKurus(n.rewardKurus)}</b>
                 </span>
                 <small className="muted">
                   {n.campaign.title} · {daysBetween(today, n.campaign.endsAt)} gün kaldı
@@ -166,6 +224,19 @@ export function Plan() {
                   <small className="muted">
                     {cardById(o.cardId)?.name} · {formatKurus(o.spentKurus)} harcama ·{" "}
                     {rewardText(o.campaign)}
+                    {o.feeKurus > 0 && (
+                      <>
+                        {" "}
+                        · {formatKurus(o.grossRewardKurus)} brüt − {formatKurus(o.feeKurus)} katılım
+                        ücreti
+                      </>
+                    )}
+                  </small>
+                  <small className="muted">{o.campaign.summary}</small>
+                  <small>
+                    <a href={o.campaign.url} target="_blank" rel="noopener noreferrer">
+                      Banka koşullarında teyit et ↗
+                    </a>
                   </small>
                 </span>
                 <strong className="num pos">+{formatKurus(o.rewardKurus)}</strong>
@@ -177,8 +248,9 @@ export function Plan() {
 
       {plan.outcomes.length === 0 && (
         <p className="muted note">
-          Kartlarına ve harcamana uyan aktif kampanya yok. Yeni kampanyalar onaylandıkça plan
-          kendiliğinden güncellenir.
+          Kayıtlı tutarlarla hesaplanabilen bir kampanya kazancı bulunamadı. İşlem eşiği, kart
+          uygunluğu veya hesaplama kapsamı nedeniyle sonuç sıfır olabilir. Keşfet bölümündeki tüm
+          kampanyaların sayısal hesaplama kuralı henüz bulunmuyor.
         </p>
       )}
       {unverified && (

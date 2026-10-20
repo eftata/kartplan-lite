@@ -2,6 +2,7 @@ import { type User, onAuthStateChanged } from "firebase/auth";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { fb } from "../firebase";
 import { isAdmin, watchCampaigns, watchCards, watchUser } from "./data";
+import { mergePlanCampaigns } from "./planCampaigns";
 import { SEED_CARDS } from "./seed";
 import { turkeyToday } from "./dates";
 import type { Campaign, CatalogCard, UserDoc } from "./types";
@@ -14,6 +15,7 @@ type AppState = {
   admin: boolean;
   catalog: CatalogCard[];
   campaigns: Campaign[];
+  planCampaigns: Campaign[];
   myCards: CatalogCard[];
   today: string;
   error: string | null;
@@ -57,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       admin,
       catalog,
       campaigns,
+      planCampaigns: mergePlanCampaigns(campaigns),
       myCards: catalog.filter((c) => ids.has(c.id)),
       today,
       error,

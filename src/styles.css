@@ -3395,3 +3395,22 @@ button.admin-row:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.plan-input-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  margin: 12px 0 24px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.plan-input-summary a {
+  color: var(--accent, #315bb0);
+}
+.outcome-list small {
+  display: block;
+  max-width: 70ch;
+  line-height: 1.6;
+  margin-top: 5px;
+}
