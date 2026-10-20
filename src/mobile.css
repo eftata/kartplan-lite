@@ -1,0 +1,479 @@
+/* Aynı içerik ve işlemler telefon, tablet ve masaüstünde erişilebilir kalır. */
+.campaign-card-body {
+  grid-template-areas: "art copy reward" "art description reward";
+  row-gap: 10px;
+}
+.campaign-art {
+  grid-area: art;
+}
+.campaign-copy {
+  grid-area: copy;
+  min-width: 0;
+  align-self: end;
+}
+.campaign-description {
+  grid-area: description;
+  align-self: start;
+  color: #718098;
+  font-size: 13px;
+  line-height: 1.75;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.campaign-reward {
+  grid-area: reward;
+  min-width: 0;
+}
+.campaign-copy h3,
+.campaign-description,
+.campaign-detail-content {
+  overflow-wrap: anywhere;
+}
+.discovery-main > *,
+.discovery-intro > *,
+.discovery-wallet > *,
+.campaign-card,
+.campaign-bank,
+.panel,
+.page {
+  min-width: 0;
+}
+.discovery-sectors,
+.discovery-programs {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+.discovery-sectors > button,
+.discovery-programs > button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+@media (max-width: 1024px) {
+  .discovery-search,
+  .discovery-controls select,
+  .input,
+  .select,
+  .field input,
+  .field select,
+  .field textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .campaign-application > a,
+  .campaign-details > summary,
+  .wallet-apply {
+    min-height: 44px;
+  }
+}
+@media (max-width: 820px) {
+  .discovery-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 44px 0;
+  }
+  .discovery-feature {
+    display: none;
+  }
+  .campaign-card-body {
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-areas: "art copy" "description description" "reward reward";
+    align-items: start;
+    gap: 16px;
+  }
+  .campaign-art {
+    aspect-ratio: 1;
+    align-self: center;
+  }
+  .campaign-copy {
+    align-self: center;
+  }
+  .campaign-reward {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .campaign-reward strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .campaign-reward small {
+    display: none;
+  }
+}
+@media (max-width: 620px) {
+  .discovery-topbar {
+    height: auto;
+    min-height: 72px;
+    padding: 12px max(16px, env(safe-area-inset-left));
+    gap: 12px;
+  }
+  .discovery-topbar nav {
+    flex: 0 0 auto;
+  }
+  .discovery-login {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .discovery-main {
+    padding: 0 16px max(48px, env(safe-area-inset-bottom));
+  }
+  .discovery-intro {
+    padding: 34px 0 38px;
+  }
+  .discovery-intro h1 {
+    font-size: clamp(33px, 9.5vw, 48px);
+    letter-spacing: -0.06em;
+    margin: 18px 0;
+  }
+  .discovery-lead {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .discovery-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .discovery-actions > a {
+    min-height: 48px;
+    font-size: 14px;
+  }
+  .discovery-section {
+    padding-top: 30px;
+    scroll-margin-top: 16px;
+  }
+  .discovery-section-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .discovery-section-title h2,
+  .discovery-wallet h2 {
+    font-size: 29px;
+    line-height: 1.2;
+  }
+  .discovery-section-title > span {
+    font-size: 12px;
+  }
+  .discovery-sectors {
+    gap: 8px;
+    padding: 4px 0 16px;
+  }
+  .discovery-sectors button {
+    min-width: 132px;
+    min-height: 64px;
+    padding: 12px;
+    gap: 10px;
+  }
+  .discovery-programs {
+    gap: 8px;
+    padding-bottom: 16px;
+  }
+  .discovery-programs button {
+    min-height: 48px;
+    padding: 10px 14px;
+  }
+  .discovery-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px 0 20px;
+  }
+  .discovery-controls > label {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    font-size: 12px;
+    min-width: 0;
+  }
+  .discovery-controls > label:nth-of-type(3) {
+    grid-column: 1 / -1;
+  }
+  .discovery-controls select {
+    min-width: 0;
+    width: 100%;
+    min-height: 46px;
+    margin: 0;
+    padding: 9px 28px 9px 12px;
+    font-size: 16px;
+  }
+  .discovery-search {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px;
+    font-size: 16px;
+    background: #fff;
+  }
+  .discovery-controls > .mine-control {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    min-height: 44px;
+  }
+  .mine-control input {
+    width: 20px;
+    height: 20px;
+  }
+  .discovery-controls > span {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .discovery-grid {
+    gap: 18px;
+  }
+  .campaign-card {
+    border-radius: 14px;
+  }
+  .campaign-card-top {
+    padding: 13px 14px;
+    gap: 8px;
+  }
+  .campaign-bank {
+    gap: 6px;
+  }
+  .campaign-bank > .program-logo {
+    width: 68px !important;
+    height: 25px !important;
+  }
+  .campaign-bank .campaign-bank-logo {
+    padding-left: 8px;
+    margin-left: 2px;
+  }
+  .campaign-bank .bank-logo {
+    width: 74px;
+    height: 23px;
+  }
+  .campaign-deadline {
+    flex: 0 0 auto;
+    max-width: 90px;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+  .campaign-card-body {
+    padding: 16px 14px;
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .campaign-copy h3 {
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  .campaign-sector {
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+  .campaign-description {
+    font-size: 14px;
+    line-height: 1.7;
+    -webkit-line-clamp: 3;
+  }
+  .campaign-reward {
+    padding: 13px;
+  }
+  .campaign-reward > span {
+    font-size: 10px;
+  }
+  .campaign-reward strong {
+    font-size: 19px;
+    line-height: 1.35;
+  }
+  .campaign-key-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+    padding: 0 14px 18px;
+  }
+  .campaign-key-facts > div > span {
+    font-size: 11px;
+  }
+  .campaign-key-facts strong {
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .campaign-key-facts p {
+    font-size: 12px;
+    line-height: 1.7;
+    -webkit-line-clamp: 3;
+  }
+  .campaign-application {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 14px;
+  }
+  .campaign-application strong {
+    font-size: 13px;
+  }
+  .campaign-application > div > span {
+    max-width: none;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .campaign-application > a {
+    min-height: 48px;
+    width: 100%;
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+  .campaign-details > summary {
+    min-height: 52px;
+    padding: 14px;
+    font-size: 13px;
+  }
+  .campaign-detail-toggle {
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+  }
+  .campaign-detail-content {
+    padding: 18px 14px;
+    font-size: 14px;
+  }
+  .campaign-detail-heading span {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .campaign-source-note {
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .campaign-detail-content > a {
+    min-height: 44px;
+    align-items: center;
+    font-size: 13px;
+  }
+  .discovery-more {
+    min-height: 48px;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .discovery-footnote {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .discovery-wallet {
+    padding: 24px 16px;
+    gap: 26px;
+    margin-top: 48px;
+    scroll-margin-top: 16px;
+  }
+  .discovery-wallet p:not(.discovery-eyebrow) {
+    font-size: 14px;
+  }
+  .discovery-wallet .discovery-primary {
+    width: 100%;
+    min-height: 48px;
+    font-size: 14px;
+  }
+  .wallet-programs > div {
+    display: grid;
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px;
+  }
+  .wallet-apply {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    max-width: none;
+    width: 100%;
+    margin: 0;
+    border-top: 1px solid #e8edf5;
+    font-size: 13px;
+    padding-top: 10px;
+  }
+  .discovery-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 24px 16px max(24px, env(safe-area-inset-bottom));
+  }
+  .discovery-footer > span {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .discovery-footer small {
+    margin: 0;
+    font-size: 12px;
+  }
+  .discovery-footer > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .input,
+  .select,
+  .field input,
+  .field select,
+  .field textarea {
+    font-size: 16px;
+  }
+  .center-page {
+    padding-inline: 16px;
+  }
+  .signin-links > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .tabbar {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .picker-grid,
+  .source-grid,
+  .admin-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 360px) {
+  .discovery-topbar .brand-type strong {
+    font-size: 20px;
+  }
+  .discovery-topbar .brand-symbol {
+    width: 34px;
+    height: 34px;
+  }
+  .campaign-card-body {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .campaign-key-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .campaign-key-facts > div:last-child {
+    grid-column: auto;
+  }
+  .campaign-key-facts p {
+    -webkit-line-clamp: 2;
+  }
+}
+@media (hover: none) {
+  .offer-card:hover,
+  .campaign-card:hover {
+    transform: none;
+  }
+}
