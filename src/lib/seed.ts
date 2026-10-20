@@ -2,6 +2,7 @@
 // Kart adları genel bilgiden derlendi; hiçbiri banka kaynağından doğrulanmadı. Oranlar bilinçli
 // olarak 0: doğrulanmamış oran planda kazancı şişirmesin. Admin panelinden doğrulanarak girilir.
 
+import importedCards from "./imported-cards.json";
 import { monthBounds } from "./dates";
 import type { Campaign, CatalogCard } from "./types";
 
@@ -53,7 +54,7 @@ export function slugify(s: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export const SEED_CARDS: CatalogCard[] = PROGRAMS.flatMap((p) =>
+const LEGACY_CARDS: CatalogCard[] = PROGRAMS.flatMap((p) =>
   p.cards.map((name) => ({
     id: slugify(name),
     bank: p.bank,
@@ -64,6 +65,36 @@ export const SEED_CARDS: CatalogCard[] = PROGRAMS.flatMap((p) =>
     verified: false,
   })),
 );
+
+// Preserve existing wallet IDs; Maximum is listed as Maximum Kart in the original catalog.
+export const SEED_CARDS: CatalogCard[] = [...LEGACY_CARDS];
+for (const source of importedCards) {
+  const name = source.name === "Maximum" ? "Maximum Kart" : source.name;
+  const existing = SEED_CARDS.find((c) => c.bank === source.bank && c.name === name);
+  const program = source.program || slugify(source.bank);
+  const programName =
+    PROGRAMS.find((p) => p.slug === program)?.name ??
+    {
+      "shop-fly": "Shop&Fly",
+      "miles-smiles": "Miles&Smiles",
+      "american-express": "American Express",
+      wings: "Wings",
+      maximiles: "Maximiles",
+    }[program] ??
+    source.bank;
+  const card: CatalogCard = {
+    ...source,
+    id: existing?.id ?? slugify(`${source.bank}-${source.name}`),
+    name,
+    program,
+    programName,
+    cardType: source.cardType === "banka" ? "banka" : "kredi",
+    baseRateBps: 0,
+    verified: false,
+  };
+  if (existing) Object.assign(existing, card);
+  else SEED_CARDS.push(card);
+}
 
 /**
  * Arayüzü denemek için ÖRNEK kampanyalar (gerçek değil; `demo: true`, arayüzde "Örnek" etiketi).

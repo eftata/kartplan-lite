@@ -3293,3 +3293,105 @@ button.admin-row:hover {
 .minicard-prog .program-logo-paraf {
   background: #009dc2;
 }
+
+/* Imported card catalog */
+.minicard-art {
+  width: 168px;
+  height: 106px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.minicard-art-sm {
+  width: 44px;
+  height: 30px;
+}
+.card-directory {
+  margin: 56px 0;
+  scroll-margin-top: 90px;
+}
+.card-directory h2 {
+  font-size: clamp(24px, 4vw, 34px);
+  letter-spacing: -0.8px;
+}
+.card-directory-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+.card-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0 24px;
+}
+.directory-card {
+  min-width: 0;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--line, #e3e8ef);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.directory-card-art {
+  width: 100%;
+  min-height: 132px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f8fb;
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+.directory-card h3 {
+  margin: 8px 0 12px;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+.directory-type {
+  font-size: 11px;
+  background: #eef3fa;
+  color: #455873;
+  border-radius: 5px;
+  padding: 4px 8px;
+}
+.directory-actions {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+}
+.directory-actions a {
+  color: #294f9e;
+  font-weight: 600;
+}
+@media (max-width: 1000px) {
+  .card-directory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .card-directory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .directory-card {
+    padding: 12px;
+  }
+  .directory-card-art .minicard-art,
+  .directory-card-art .minicard {
+    max-width: 100%;
+  }
+  .card-directory-filters {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 360px) {
+  .card-directory-grid {
+    grid-template-columns: 1fr;
+  }
+}

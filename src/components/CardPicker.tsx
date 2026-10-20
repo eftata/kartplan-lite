@@ -41,6 +41,9 @@ export function CardPicker({
 
   return (
     <div className="picker">
+      <p className="muted small">
+        {catalog.length} kart · {new Set(catalog.map((c) => c.bank)).size} banka / marka
+      </p>
       <input
         className="input"
         type="search"
@@ -67,7 +70,11 @@ export function CardPicker({
                   <span className="pick-text">
                     <strong>{c.name}</strong>
                     <small>
-                      {c.verified ? `Temel ${formatBps(c.baseRateBps)}` : "Oran doğrulanmadı"}
+                      {c.verified
+                        ? `Temel ${formatBps(c.baseRateBps)}`
+                        : c.cardType === "banka"
+                          ? "Banka kartı"
+                          : "Kredi kartı"}
                     </small>
                   </span>
                   <span className="pick-check" aria-hidden="true">

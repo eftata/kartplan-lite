@@ -533,8 +533,16 @@ function CampaignForm({
 
 function CardAdmin() {
   const { catalog } = useApp();
+  const programs = [
+    ...new Map(
+      catalog.map((c) => [
+        `${c.bank}:${c.program}`,
+        { key: `${c.bank}:${c.program}`, bank: c.bank, slug: c.program, name: c.programName },
+      ]),
+    ).values(),
+  ];
   const [msg, setMsg] = useState("");
-  const [newCard, setNewCard] = useState({ program: PROGRAMS[0]?.slug ?? "", name: "" });
+  const [newCard, setNewCard] = useState({ program: programs[0]?.key ?? "", name: "" });
 
   async function seed() {
     const n = await seedCatalog();
@@ -543,11 +551,11 @@ function CardAdmin() {
 
   async function add(e: FormEvent) {
     e.preventDefault();
-    const p = PROGRAMS.find((x) => x.slug === newCard.program);
+    const p = programs.find((x) => x.key === newCard.program);
     const name = newCard.name.trim();
     if (!p || !name) return;
-    const id = slugify(name);
-    if (catalog.some((c) => c.id === id)) {
+    const id = slugify(`${p.bank}-${name}`);
+    if (catalog.some((c) => c.id === id || (c.bank === p.bank && c.name === name))) {
       setMsg("Bu adla bir kart zaten var.");
       return;
     }
@@ -579,9 +587,9 @@ function CardAdmin() {
           onChange={(e) => setNewCard({ ...newCard, program: e.target.value })}
           aria-label="Program"
         >
-          {PROGRAMS.map((p) => (
-            <option key={p.slug} value={p.slug}>
-              {p.name}
+          {programs.map((p) => (
+            <option key={p.key} value={p.key}>
+              {p.bank} · {p.name}
             </option>
           ))}
         </select>

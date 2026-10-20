@@ -42,7 +42,7 @@ export function watchCards(cb: (cards: CatalogCard[]) => void, onError: (e: Erro
       // Yönetici tarafından kaydedilen sürüm aynı kimlikli varsayılan kartın yerini alır.
       const byId = new Map(SEED_CARDS.map((card) => [card.id, card]));
       snap.docs.forEach((d) =>
-        byId.set(d.id, { ...(d.data() as Omit<CatalogCard, "id">), id: d.id }),
+        byId.set(d.id, { ...byId.get(d.id), ...(d.data() as Omit<CatalogCard, "id">), id: d.id }),
       );
       const cards = [...byId.values()];
       cards.sort(

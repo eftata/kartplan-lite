@@ -1,0 +1,560 @@
+[
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/ed4ee963-1570-4570-8e14-a03d20e2a81d.svg",
+    "name": "Axess",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/axess-akbank",
+    "program": "axess",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "QNB",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/7fa0aac1-cbf9-4258-b5f7-59324f7fb622.png",
+    "name": "Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/qnb/qnb-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/cda5b9e5-7c93-4090-b170-5522b8bc54fd.svg",
+    "name": "Bonus Genç",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/bonus-genc",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/070708e5-3917-4bbe-88af-c93dd3cbe598.png",
+    "name": "Wings",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/akbank-wings",
+    "program": "wings",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/a9f5c20e-ad92-4a03-8626-6d589f8238e9.png",
+    "name": "Bonus Card",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/garanti-bonus",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Enpara",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/36b9907a-89ba-449e-8144-6fd255eb4e49.png",
+    "name": "Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/enpara/enpara-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "ON",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/a285d196-347a-4e05-86ae-89ebe4325304.png",
+    "name": "Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/on/on-bank-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/48a8d9c8-1af4-4433-9014-cd41eea0ce64.png",
+    "name": "BJK Bonus",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/bjk-bonus",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/6a44fcad-93db-4f78-b10e-59b308ea6098.png",
+    "name": "Fenerbahçe Bonus",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/fenerbahce-bonus",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/f2f5aaa0-ab03-4aac-9248-4281d97c1a0a.png",
+    "name": "Trabzonspor Bonus",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/trabzonspor-bonus",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/b843e94a-86ab-4330-9a3a-8daf88f0bee3.png",
+    "name": "Bonus Gold",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/bonus-gold",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Enpara",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/38a0b55d-de39-40d9-9e75-54bf1f65bb08.svg",
+    "name": "Encard",
+    "sourceUrl": "https://hesap.com/kredi-karti/enpara/encard-banka-karti",
+    "program": "",
+    "cardType": "banka",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "QNB",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/692f0483-4a1b-4cdd-afd1-d38763a58ed5.svg",
+    "name": "GSPara",
+    "sourceUrl": "https://hesap.com/kredi-karti/gs-para/qnb-gspara",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "QNB",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/dccb1a08-5d89-4349-ad16-d5d20cb12bb8.png",
+    "name": "Fenerpara",
+    "sourceUrl": "https://hesap.com/kredi-karti/fener-para/qnb-fenerpara",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/a2ab33c0-6332-4475-be51-2bfc59c1feba.png",
+    "name": "Maximum Genç",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/turkiye-is-bankasi-maksimum-genc",
+    "program": "maximum",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/acc1344a-de8b-4b35-bf68-f0fd2a6f7254.png",
+    "name": "Garanti Bonus Troy",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/garanti-bonus-troy",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/67014018-fe27-4950-b84d-5e692cf50a7b.png",
+    "name": "Maximiles",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/turkiye-is-bankasi-maximiles-kart",
+    "program": "maximiles",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/18e3b9a7-4279-4cbc-b200-f16c4be90547.png",
+    "name": "Bonus Platinum",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/garanti-bbva-bonus-platinum-card",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/36633ad2-1bfa-4ddc-a87e-e931a5a84eed.png",
+    "name": "Axess Business",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/axess-business-akbank",
+    "program": "axess",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Enpara",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/d61a87dc-aeda-4863-91b4-154e0d39b511.png",
+    "name": "Şirketim Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/enpara/enpara-sirketim-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "QNB",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/8956e389-f384-4524-a682-e516fc30a194.png",
+    "name": "GO Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/qnb/qnb-go-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Ziraat Dinamik",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/eff0e32e-5435-4aa0-990b-7c04babffff0.png",
+    "name": "Dijital Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/ziraat-dinamik/ziraat-dinamik-dijital-kart",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/7047bc36-a883-4079-96fa-1a729b308cc5.svg",
+    "name": "Axess Öğrenci Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/axess-akbank-ogrenci",
+    "program": "axess",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türk Ekonomi Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/c18bae5e-f1a2-45ab-a90d-b0c3a2cf4d8a.png",
+    "name": "Infinite Card",
+    "sourceUrl": "https://hesap.com/kredi-karti/teb/teb-infinite-card",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/959824ec-4cab-4154-9e40-d9bf07bc3114.png",
+    "name": "Shop&Fly Platinum",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/garanti-shop-fly-platinum",
+    "program": "shop-fly",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/fd6dfb7e-37b5-4ca1-b09c-e1716f10ea6b.png",
+    "name": "Maximum",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/turkiye-is-bankasi-maksimum-kart",
+    "program": "maximum",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/0c5f86a5-1591-4099-b501-bdb9fde45e02.png",
+    "name": "Bonus Amex",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/bonus-amex",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "DenizBank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/1749b19d-bd03-4f62-b227-995a93d98902.svg",
+    "name": "DenizBank Gold",
+    "sourceUrl": "https://hesap.com/kredi-karti/denizbank/denizbank-gold",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türk Ekonomi Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/0c8099c5-24da-4e8b-91a4-6548e7232a57.png",
+    "name": "She Card",
+    "sourceUrl": "https://hesap.com/kredi-karti/teb/teb-she-card",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/ae56757d-5151-4919-93bf-c68309634cfb.png",
+    "name": "American Express",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/american-express",
+    "program": "american-express",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/9532aa4c-4068-49f1-b885-858e4f4a0b8c.png",
+    "name": "Miles&Smiles Platinum",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/miles-smiles",
+    "program": "miles-smiles",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "getirfinans",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/35747e82-e5b6-4f0b-9ea8-8fd8c15db148.png",
+    "name": "Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/getir-finans/getir-finans-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/37de446d-8a6c-44be-b8ee-433389a9017a.png",
+    "name": "Money Bonus",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/money-bonus",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/97e8cd3f-1c52-465c-84ea-b094672c9b87.png",
+    "name": "Wings Black",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/wings-black",
+    "program": "wings",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/93d85f57-6355-40e1-aad2-dadd8e4d7641.png",
+    "name": "Bonus Flexi",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/bonus-flexi",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/422133eb-2a93-4534-8b74-a20a786f2837.png",
+    "name": "Maximiles Black",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/maximiles-black",
+    "program": "maximiles",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türk Ekonomi Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/840ff316-e1f3-4bd7-93fe-064d2babacaf.png",
+    "name": "Bonus Card",
+    "sourceUrl": "https://hesap.com/kredi-karti/teb/teb-bonus-card",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/49eb3a9b-361c-45fb-8432-0e65d054c095.png",
+    "name": "Çevreci Bonus",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/cevreci-bonus",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/3f76169c-4a87-4050-a645-e262404294bf.png",
+    "name": "Bonus Platinum Biyometrik",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/bonus-platinum-biyometrik",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "CEPTETEB",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/69343da6-ae8c-4950-b571-807bfe079363.png",
+    "name": "Digital Card",
+    "sourceUrl": "https://hesap.com/kredi-karti/cepteteb/cepteteb-digital-card",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "DenizBank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/bcf8b1de-02bb-41f9-a4e1-fdbf5905cb3a.svg",
+    "name": "Platinum",
+    "sourceUrl": "https://hesap.com/kredi-karti/denizbank/denizbank-platinum",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/55e63da4-13a0-4e2e-9a42-616e5456bea0.svg",
+    "name": "Axess Dijital Kart",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/axess-dijital-kart",
+    "program": "axess",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/1214ea0b-db32-41d9-883c-9d10f191ee0e.png",
+    "name": "Wings Dijital Kart",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/wings-dijital-kart",
+    "program": "wings",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Garanti BBVA",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/86ff8f25-e3aa-4748-a2a9-d0fecde3330f.png",
+    "name": "Bonus Business Kart",
+    "sourceUrl": "https://hesap.com/kredi-karti/garanti-bbva/garanti-bonus-business",
+    "program": "bonus",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "ING",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/357cc6aa-bd2a-43cf-82cb-20e05e75032f.svg",
+    "name": "ING Bonus Card",
+    "sourceUrl": "https://hesap.com/kredi-karti/ing/ing-bonus-card",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Ziraat Dinamik",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/dd4cfd20-d7a8-41bf-ae8c-16d58704515b.png",
+    "name": "Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/ziraat-dinamik/ziraat-dinamik-kredi-karti",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "DenizBank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/be896d9f-80d4-4436-a771-1014f4ffd4c6.svg",
+    "name": "Business Select",
+    "sourceUrl": "https://hesap.com/kredi-karti/denizbank/denizbank-business-select",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Akbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/039dda97-1f81-4e72-8fd4-25759379a630.png",
+    "name": "Wings Business",
+    "sourceUrl": "https://hesap.com/kredi-karti/akbank/akbank-wings-business",
+    "program": "wings",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Enpara",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/23d973d0-d90a-448f-bc62-c5d8d7654347.svg",
+    "name": "Encard Genç",
+    "sourceUrl": "https://hesap.com/kredi-karti/enpara/encard-genc",
+    "program": "",
+    "cardType": "banka",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/0c77abec-a043-4482-9cab-28b6702c5605.png",
+    "name": "Maximum Business Tema",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/maximum-business-tema",
+    "program": "maximum",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Ziraat Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/f6b2fe3f-25f1-4017-9ecb-03663a7ebcee.png",
+    "name": "Ziraat Platinum",
+    "sourceUrl": "https://hesap.com/kredi-karti/ziraat-bankasi/ziraat-platinum",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "DenizBank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/98906e28-ab1c-4dbe-bd45-2aed7f35018b.svg",
+    "name": "Üretici Kart",
+    "sourceUrl": "https://hesap.com/kredi-karti/denizbank/uretici-kart",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/fff60d90-c05c-4048-a065-7e2cd615c88c.png",
+    "name": "Maximum Business Troy",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/maximum-business",
+    "program": "maximum",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/a9602067-ea06-485c-a975-867309314f45.png",
+    "name": "Maximum Business VISA",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/turkiye-is-bankasi-maximum-bussines-visa-kart",
+    "program": "maximum",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Türkiye İş Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/89aca69f-3f16-4379-b2bf-d1251be96bd2.png",
+    "name": "Maximiles Business",
+    "sourceUrl": "https://hesap.com/kredi-karti/turkiye-is-bankasi/maximiles-business",
+    "program": "maximiles",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Ziraat Bankası",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/da4a6560-e6e5-4f74-ad48-dfcd7b2a2131.png",
+    "name": "Bankkart",
+    "sourceUrl": "https://hesap.com/kredi-karti/ziraat-bankasi/ziraat-bankkart",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "getirfinans",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/d18efdd5-c70f-443c-822e-0cf5edd120f3.png",
+    "name": "Hesap Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/getir-finans/getirfinans-hesap-karti",
+    "program": "",
+    "cardType": "banka",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "DenizBank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/eb2765aa-4762-4e00-b530-d3896c770cc4.svg",
+    "name": "İşletme Kart Gold",
+    "sourceUrl": "https://hesap.com/kredi-karti/denizbank/denizbank-isletme-kart",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "QNB KOBİ",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/a558e23e-f5af-489e-848b-2559727e4434.png",
+    "name": "Kredi Kartı",
+    "sourceUrl": "https://hesap.com/kredi-karti/qnb/qnb-kobi",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Halkbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/d110148e-d48f-4057-bf89-532e337b1c4f.png",
+    "name": "Paraf",
+    "sourceUrl": "https://hesap.com/kredi-karti/halk-bankasi/halkbank-paraf",
+    "program": "paraf",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "Halkbank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/38d5aa93-3fec-4d15-8716-b15233aead10.png",
+    "name": "Paraf Business",
+    "sourceUrl": "https://hesap.com/kredi-karti/halk-bankasi/halkbank-paraf-business",
+    "program": "paraf",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  },
+  {
+    "bank": "VakıfBank",
+    "imageUrl": "https://cdn.hesap.com/cdn-cgi/image/width=160,height=102,fit=pad,quality=80,format=webp/card/logos/0e6d73ad-1c9d-4252-b4d3-e6d3ae7171c6.png",
+    "name": "Milplus Kart",
+    "sourceUrl": "https://hesap.com/kredi-karti/vakif-bank/milplus-vakifbank",
+    "program": "",
+    "cardType": "kredi",
+    "observedAt": "2026-10-21"
+  }
+]

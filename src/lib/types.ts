@@ -12,6 +12,10 @@ export type CatalogCard = {
   /** Her harcamada temel kazanç (baz puan). Doğrulanmadıysa 0. */
   baseRateBps: number;
   verified: boolean;
+  imageUrl?: string;
+  sourceUrl?: string;
+  observedAt?: string;
+  cardType?: "kredi" | "banka";
 };
 
 export type Benefit = "puan" | "iade" | "indirim";

@@ -1,3 +1,4 @@
+import { CardCatalog } from "../components/CardCatalog";
 import { useEffect, useState } from "react";
 import { ProgramIcon } from "../components/ProgramIcon";
 import { Brand } from "../components/Brand";
@@ -359,6 +360,7 @@ export function Explore() {
             ))}
           </div>
         </section>
+        <CardCatalog cards={catalog} signedIn={!!user} />
       </main>
       <footer className="discovery-footer">
         <span>
