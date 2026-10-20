@@ -6,6 +6,7 @@ import { useApp } from "./lib/store";
 import { Admin } from "./pages/Admin";
 import { Calculator } from "./pages/Calculator";
 import { Campaigns } from "./pages/Campaigns";
+import { Explore } from "./pages/Explore";
 import { Landing } from "./pages/Landing";
 import { MyCards } from "./pages/MyCards";
 import { Onboarding } from "./pages/Onboarding";
@@ -41,6 +42,7 @@ export function App() {
   }, [authReady, user, path]);
 
   if (path === "/aydinlatma") return <Privacy />;
+  if (path === "/kesfet") return <Explore />;
   if (!authReady || (user && profile === undefined)) return <Splash />;
   if (!user) return path === "/giris" ? <SignIn /> : <Landing />;
   // Admin, katalog boşken de (kendi kurulumundan önce) yönetim sayfasına girebilir.
