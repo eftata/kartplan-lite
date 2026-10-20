@@ -3,6 +3,7 @@ import { PageHead } from "../components/Layout";
 import { BENEFIT_LABEL, CATEGORIES } from "../lib/categories";
 import { estimateForProfile, eligibleCards, optimize } from "../lib/optimizer";
 import { navigate, usePath } from "../lib/router";
+import { Link } from "../lib/router";
 import { useSession } from "../lib/store";
 import type { Benefit } from "../lib/types";
 
@@ -161,6 +162,10 @@ export function Campaigns() {
       {rows.length === 0 && (
         <div className="empty">
           <p>Bu filtrelere uyan kampanya yok.</p>
+          <p>Bankaların güncel kampanyalarını keşif sayfasından inceleyebilirsin.</p>
+          <Link href="/kesfet" className="btn btn-primary">
+            Kampanya kaynaklarına git
+          </Link>
           {scope === "bana" && (
             <button type="button" className="btn btn-ghost" onClick={() => set("kapsam", "tumu")}>
               Tüm kampanyaları göster
