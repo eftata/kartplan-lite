@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ProgramIcon } from "../components/ProgramIcon";
+import { Brand } from "../components/Brand";
 import { EXTERNAL_CAMPAIGNS, type ExternalCampaign } from "../lib/externalCampaigns";
 import { Link } from "../lib/router";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
@@ -113,7 +114,7 @@ export function Explore() {
     <div className="discovery">
       <header className="discovery-topbar">
         <Link href="/kesfet" className="discovery-logo" aria-label="KartPlan ana sayfa">
-          K<span>·</span>PLAN <small>KART KAMPANYALARI</small>
+          <Brand subtitle />
         </Link>
         <nav aria-label="Ana menü">
           <a href="#kampanyalar">Kampanyalar</a>
@@ -376,7 +377,7 @@ export function Explore() {
       </main>
       <footer className="discovery-footer">
         <span>
-          K·PLAN <small>Bağımsız kampanya takip aracı</small>
+          <Brand /> <small>Bağımsız kampanya takip aracı</small>
         </span>
         <Link href="/aydinlatma">Aydınlatma metni</Link>
       </footer>
