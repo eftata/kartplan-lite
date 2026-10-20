@@ -119,10 +119,9 @@ menüde **Yönetim** çıkar. Oradan:
 
 ## Tasarım
 
-- Renk: coolors trend paletlerinden “olive garden” — `#fefae0` `#283618` `#606c38` `#dda15e`
-  `#bc6c25`; koyu tema aynı paletten türetilir (`src/styles.css` başındaki değişkenler).
-- Yazı: **Fraunces** (başlık ve rakamlar), **IBM Plex Sans** (metin), **IBM Plex Mono** (etiketler) —
-  paketle gelir, Google Fonts'a istek atmaz.
+- Renk: lacivert ve kobalt temelli KartPlan paleti (`src/styles.css` başındaki değişkenler).
+- Yazı: **Plus Jakarta Sans** (arayüz ve başlıklar), **IBM Plex Mono** (etiketler). Fontlar
+  paketle gelir, Google Fonts'a istek atılmaz.
 
 ## Bilinçli olarak dışarıda
 
