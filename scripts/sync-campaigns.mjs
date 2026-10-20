@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { load } from "cheerio";
+import { campaignFacts, enrichCampaigns } from "./campaign-details.mjs";
 
 const sources = {
   bonus: "https://www.bonus.com.tr/kampanyalar",
@@ -57,7 +58,12 @@ function item(program, url, title, extra = {}) {
   const text = clean(title);
   if (text.length < 12 || text.length > 280) return null;
   const benefit = clean(
-    extra.benefit || text.match(/(?:%\s?\d+|\d[\d.,]*\s?(?:TL|₺|taksit))/i)?.[0] || "",
+    extra.benefit ||
+      text.match(
+        /\d[\d.,]*\s?(?:TL|₺)(?:['’]?(?:ye|ya))?\s*(?:varan\s*)?(?:bonus|MaxiPuan|Worldpuan|ParafPara|chip[ -]?para|indirim)/i,
+      )?.[0] ||
+      text.match(/(?:%\s?\d+\s*(?:indirim)?|\d+\s+taksit)/i)?.[0] ||
+      "",
   );
   return {
     id: idFor(safe.href),
@@ -198,7 +204,22 @@ for (const [program, collect] of Object.entries({ bonus, maximum, world, axess, 
     throw new Error(`${program} sync failed: ${error.message}`);
   }
 }
-const feed = { updatedAt: new Date().toISOString(), counts, campaigns: all };
+let previous = [];
+try {
+  previous = JSON.parse(
+    await readFile(new URL("../public/campaign-feed.json", import.meta.url), "utf8"),
+  ).campaigns;
+} catch {
+  /* İlk senkronizasyonda önbellek bulunmaz. */
+}
+const enriched = await enrichCampaigns(all, previous);
+const feed = {
+  updatedAt: new Date().toISOString(),
+  counts,
+  campaigns: enriched.map((campaign) =>
+    campaign.conditions ? { ...campaign, ...campaignFacts(campaign.conditions) } : campaign,
+  ),
+};
 await writeFile(
   new URL("../public/campaign-feed.json", import.meta.url),
   `${JSON.stringify(feed, null, 2)}\n`,
