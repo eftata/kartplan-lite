@@ -962,6 +962,9 @@ input[type="range"] {
 
 .minicard-prog {
   font: italic 600 0.95rem var(--display);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .minicard-chip {
@@ -2354,6 +2357,55 @@ button.admin-row:hover {
   background: #e8edff;
   color: #3154bb;
   font: 700 17px var(--sans);
+}
+.offer-bank-mark:has(svg) {
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border-radius: 0;
+}
+.offer-bank-mark svg,
+.wallet-mark svg {
+  display: block;
+  flex: none;
+}
+.wallet-mark:has(svg) {
+  background: transparent;
+  border-radius: 0;
+}
+.discovery-search {
+  min-width: 210px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  color: var(--navy);
+  font: inherit;
+}
+.discovery-search::placeholder {
+  color: #9aa7b8;
+}
+.discovery-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--blue);
+  font: 700 14px var(--sans);
+  cursor: pointer;
+}
+.discovery-more:hover {
+  background: var(--pale);
+}
+.discovery-more span {
+  color: #8a96a8;
+  font-size: 12px;
+  font-weight: 500;
 }
 .offer-maximum .offer-bank-mark {
   background: #e7f3fc;
