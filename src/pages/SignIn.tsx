@@ -7,6 +7,7 @@ import {
 } from "firebase/auth";
 import { type FormEvent, useState } from "react";
 import { fb } from "../firebase";
+import { Brand } from "../components/Brand";
 import { Link } from "../lib/router";
 
 function authMessage(code: string): string {
@@ -65,7 +66,7 @@ export function SignIn() {
     <div className="center-page">
       <div className="panel narrow">
         <Link href="/" className="wordmark">
-          Kart<em>Plan</em>
+          <Brand />
         </Link>
         <h1>{mode === "giris" ? "Tekrar hoş geldin" : "Hesap oluştur"}</h1>
         <p className="muted">Kartlarını ve planını her cihazdan görebilmen için.</p>
