@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { Brand } from "./Brand";
 import { Link, usePath } from "../lib/router";
 import { useApp } from "../lib/store";
 
@@ -18,7 +19,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="shell">
       <header className="topbar">
         <Link href="/plan" className="wordmark" aria-label="KartPlan ana sayfa">
-          Kart<em>Plan</em>
+          <Brand />
         </Link>
         <nav className="topnav" aria-label="Ana menü">
           {NAV.map((n) => (
