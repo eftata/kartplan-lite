@@ -6199,16 +6199,6 @@
       "sourceUrl": "https://www.paraf.com.tr/tr/kampanyalar/giyim-kozmetik-ve-aksesuar/imannoorda-1500-tlye-varan-parafpara.html"
     },
     {
-      "id": "f5a0a52bb3fc9692",
-      "program": "paraf",
-      "title": "Paraf TROY kart ile Pazarama'da 250 TL indirim ve Pazarama Plus üyeliği hediye!",
-      "category": "E-ticaret",
-      "summary": "",
-      "benefit": "250 TL",
-      "endsAt": "",
-      "sourceUrl": "https://www.paraf.com.tr/tr/kampanyalar/e-ticaret/paraf-troy-kart-ile-pazaramada-250tl-indirim-ve-pazarama-plus-uyeligi-hediye.html"
-    },
-    {
       "id": "3612d91fbecc08ba",
       "program": "paraf",
       "title": "Paraf’a Özel Budget’ta %33 İndirim",
@@ -6287,6 +6277,16 @@
       "benefit": "400 TL",
       "endsAt": "",
       "sourceUrl": "https://www.paraf.com.tr/tr/kampanyalar/e-ticaret/paraf-troy-kartini-trendyola-kaydedenlere-400-tl-indirim.html"
+    },
+    {
+      "id": "f5a0a52bb3fc9692",
+      "program": "paraf",
+      "title": "Paraf TROY kart ile Pazarama'da 250 TL indirim ve Pazarama Plus üyeliği hediye!",
+      "category": "E-ticaret",
+      "summary": "",
+      "benefit": "250 TL",
+      "endsAt": "",
+      "sourceUrl": "https://www.paraf.com.tr/tr/kampanyalar/e-ticaret/paraf-troy-kart-ile-pazaramada-250tl-indirim-ve-pazarama-plus-uyeligi-hediye.html"
     },
     {
       "id": "b6b0a4a2918c3299",
