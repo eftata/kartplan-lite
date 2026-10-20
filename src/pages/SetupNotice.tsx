@@ -1,9 +1,11 @@
+import { Brand } from "../components/Brand";
+
 export function SetupNotice() {
   return (
     <div className="center-page">
       <div className="panel narrow">
         <span className="wordmark">
-          Kart<em>Plan</em>
+          <Brand />
         </span>
         <h1>Firebase bağlantısı yok</h1>
         <p>
