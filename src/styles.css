@@ -2445,7 +2445,7 @@ button.admin-row:hover {
 .offer-content h3 {
   margin: 8px 0 10px;
   color: var(--navy);
-  font: 600 23px/1.19 var(--display);
+  font: 600 20px/1.24 var(--display);
   letter-spacing: -0.035em;
 }
 .offer-content p {
