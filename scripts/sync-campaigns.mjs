@@ -115,13 +115,19 @@ async function world() {
       const slug = new URL(offer.Url || sources.world).pathname.split("/").pop() || "";
       const titleWords = clean(offer.PageTitle || offer.Title)
         .toLocaleLowerCase("tr")
+        .replace(/ı/g, "i")
+        .replace(/ş/g, "s")
+        .replace(/ğ/g, "g")
+        .replace(/ç/g, "c")
+        .replace(/ö/g, "o")
+        .replace(/ü/g, "u")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, " ")
         .split(" ")
         .filter(
           (word) =>
-            word.length >= 6 &&
+            word.length >= 5 &&
             ![
               "worldpuan",
               "worldun",
@@ -130,6 +136,10 @@ async function world() {
               "firsati",
               "ozel",
               "taksit",
+              "kartin",
+              "kredi",
+              "hediye",
+              "varan",
             ].includes(word),
         );
       // Kaynak API nadiren başlığı başka bir kampanyanın URL'siyle eşleştiriyor.
