@@ -683,26 +683,49 @@ input[type="range"] {
 /* ---------- landing ---------- */
 
 .landing {
-  max-width: 1040px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
 .landing .topbar-plain {
-  padding: 1.1rem 16px;
+  padding: 1.4rem 24px;
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.landing-nav > a:not(.btn) {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.landing-nav > a:not(.btn):hover {
+  color: var(--ink);
 }
 
 .hero {
   display: grid;
-  gap: 1.1rem;
-  padding: 2.5rem 16px 3rem;
+  gap: 3rem;
+  padding: clamp(3.5rem, 8vw, 7rem) 24px 5rem;
+  align-items: center;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 1.4rem;
 }
 
 .hero h1 {
-  font-size: clamp(2.3rem, 7vw, 4.4rem);
+  font-size: clamp(3.4rem, 7vw, 6.5rem);
   font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
-  max-width: 13ch;
+  line-height: 0.99;
+  letter-spacing: -0.045em;
+  max-width: 10ch;
 }
 
 .hero h1 em {
@@ -711,9 +734,9 @@ input[type="range"] {
 }
 
 .lead {
-  font-size: 1.08rem;
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
   color: var(--ink-soft);
-  max-width: 54ch;
+  max-width: 48ch;
 }
 
 .hero-cta {
@@ -721,27 +744,40 @@ input[type="range"] {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 0.4rem;
+  margin-top: 0.8rem;
+}
+
+.hero-reassurance {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  padding-left: 0.15rem;
 }
 
 .hero-demo {
   position: relative;
-  margin-top: 1.5rem;
   background: var(--olive-900);
   color: var(--cream);
-  border-radius: 20px;
-  padding: 1.6rem 1.2rem 1.2rem;
+  border-radius: 28px;
+  padding: 2rem;
   display: grid;
-  gap: 0.2rem;
-  max-width: 460px;
-  transform: rotate(-1.2deg);
-  box-shadow: 0 30px 50px -30px rgb(40 54 24 / 0.6);
+  gap: 0.25rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 32px 70px -34px rgb(40 54 24 / 0.6);
+}
+
+.demo-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.demo-month {
+  color: rgb(254 250 224 / 0.65);
+  font-size: 0.8rem;
 }
 
 .hero-demo-label {
-  position: absolute;
-  top: -11px;
-  right: 18px;
   background: var(--earth);
   color: var(--olive-900);
   font: 500 0.7rem var(--mono);
@@ -749,6 +785,12 @@ input[type="range"] {
   letter-spacing: 0.08em;
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
+}
+
+.demo-title {
+  font: 500 clamp(1.7rem, 3vw, 2.5rem)/1.13 var(--display);
+  letter-spacing: -0.025em;
+  margin: 1.15rem 0 1.5rem;
 }
 
 .demo-row {
@@ -776,36 +818,45 @@ input[type="range"] {
 }
 
 .demo-total strong {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
+}
+
+.demo-disclaimer {
+  color: rgb(254 250 224 / 0.58);
+  font-size: 0.72rem;
+  margin-top: 0.65rem;
 }
 
 @media (min-width: 820px) {
   .hero {
-    grid-template-columns: 1.25fr 1fr;
-    align-items: center;
-    padding-top: 4rem;
-  }
-
-  .hero > :not(.hero-demo) {
-    grid-column: 1;
+    grid-template-columns: 1.15fr 0.85fr;
   }
 
   .hero-demo {
-    grid-column: 2;
-    grid-row: 1 / span 4;
-    margin-top: 0;
+    justify-self: end;
   }
 }
 
 .steps {
   display: grid;
   gap: 1rem;
-  padding: 1rem 16px 3rem;
+  padding: 3rem 24px 5rem;
+  border-top: 1px solid var(--line);
 }
 
-.steps > div {
-  border-top: 1.5px solid var(--ink);
-  padding-top: 1rem;
+.steps-heading {
+  grid-column: 1 / -1;
+  margin-bottom: 1rem;
+}
+
+.steps-heading h2 {
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  margin-top: 0.6rem;
+}
+
+.steps > div:not(.steps-heading) {
+  border-top: 1px solid var(--line-strong);
+  padding: 1.25rem 0.4rem 0;
   display: grid;
   gap: 0.4rem;
 }
@@ -831,10 +882,28 @@ input[type="range"] {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.6rem;
-  padding: 1.5rem 16px 2.5rem;
+  padding: 1.5rem 24px 2.5rem;
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
   color: var(--ink-soft);
+}
+
+@media (max-width: 560px) {
+  .landing-nav > a:not(.btn) {
+    display: none;
+  }
+  .landing .topbar-plain {
+    padding: 1rem 20px;
+  }
+  .hero {
+    padding: 3.5rem 20px 4rem;
+  }
+  .hero-demo {
+    padding: 1.5rem;
+  }
+  .steps {
+    padding: 3rem 20px 4rem;
+  }
 }
 
 /* ---------- kart görselleri ---------- */
