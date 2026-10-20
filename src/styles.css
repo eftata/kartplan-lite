@@ -2320,11 +2320,11 @@ button.admin-row:hover {
 }
 .discovery-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 17px;
 }
 .offer-card {
-  min-height: 288px;
+  min-height: 268px;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
@@ -2344,7 +2344,9 @@ button.admin-row:hover {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 19px 21px 0;
+  padding: 17px 21px;
+  background: #f8faff;
+  border-bottom: 1px solid var(--border);
   font-weight: 700;
   font-size: 13px;
 }
@@ -2359,10 +2361,24 @@ button.admin-row:hover {
   font: 700 17px var(--sans);
 }
 .offer-bank-mark:has(svg) {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   background: transparent;
   border-radius: 0;
+}
+.offer-source {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.offer-source strong {
+  font-size: 13px;
+}
+.offer-source small {
+  margin-top: 3px;
+  color: #8a97aa;
+  font-size: 11px;
+  font-weight: 500;
 }
 .offer-bank-mark svg,
 .wallet-mark svg {
@@ -2434,19 +2450,44 @@ button.admin-row:hover {
 }
 .offer-content {
   flex: 1;
-  padding: 21px 21px 17px;
+  padding: 20px 21px 16px;
 }
 .offer-benefit {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 5px;
+  background: #eaf0ff;
   color: var(--blue);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
 .offer-content h3 {
-  margin: 8px 0 10px;
+  margin: 12px 0 10px;
   color: var(--navy);
   font: 600 20px/1.24 var(--display);
   letter-spacing: -0.035em;
+}
+.offer-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  padding: 0 21px 17px;
+}
+.offer-facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.offer-facts small {
+  color: #9aa7b9;
+  font: 700 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.offer-facts strong {
+  color: #52637c;
+  font-size: 12px;
+  font-weight: 600;
 }
 .offer-content p {
   color: #6d7a8f;
