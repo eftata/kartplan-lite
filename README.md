@@ -1,6 +1,6 @@
 # KartPlan Lite — yalnızca Firebase
 
-Ana projenin (Next.js + Postgres + Python motoru) sade sürümü. Sunucu yok: **Firebase Hosting**
+[KartPlan](https://github.com/eftata/Kartkampanya) projesinin (Next.js + Postgres + Python motoru) sade sürümü. Sunucu yok: **Firebase Hosting**
 statik sayfayı sunar, **Firebase Auth** girişi, **Cloud Firestore** veriyi tutar. Plan hesabı
 tarayıcıda yapılır. Ücretsiz (Spark) planda çalışır; Cloud Functions gerekmez.
 
@@ -61,8 +61,7 @@ gerekmez.
 
 ### GitHub Actions ile deploy (önerilen)
 
-`.github/workflows/firebase-deploy.yml` varsayılan dala her push'ta (yalnızca `kartplan-lite/`
-değişince) test + build yapıp Hosting'i ve Firestore kurallarını kurar. Actions → “Firebase deploy”
+`.github/workflows/firebase-deploy.yml` varsayılan dala her push'ta test + build yapıp Hosting'i ve Firestore kurallarını kurar. Actions → “Firebase deploy”
 → **Run workflow** ile elle de çalışır. Bir kerelik kurulum:
 
 1. **Proje:** [Firebase konsolu](https://console.firebase.google.com) → _Proje ekle_ → bir ad ver
@@ -93,7 +92,7 @@ Ortam ayarlarına (oturum başlığındaki bulut ortamı menüsü → _Edit_) ik
 alınacağı yukarıda 1–5. adımlarda). Yeni oturumda:
 
 ```bash
-cd kartplan-lite && npm run deploy:ci   # npm ci + test + build + firebase deploy
+npm run deploy:ci   # npm ci + test + build + firebase deploy
 ```
 
 ### Emülatörle (bulut projesi olmadan)

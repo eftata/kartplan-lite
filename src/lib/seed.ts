@@ -1,4 +1,4 @@
-// Başlangıç kataloğu (ana projedeki packages/db/prisma/seed-data/catalog.ts ile aynı).
+// Başlangıç kataloğu (eftata/Kartkampanya → packages/db/prisma/seed-data/catalog.ts ile aynı).
 // Kart adları genel bilgiden derlendi; hiçbiri banka kaynağından doğrulanmadı. Oranlar bilinçli
 // olarak 0: doğrulanmamış oran planda kazancı şişirmesin. Admin panelinden doğrulanarak girilir.
 
