@@ -8,8 +8,7 @@ export function MiniCard({ card, small }: { card: CatalogCard; small?: boolean }
       aria-hidden="true"
     >
       <span className="minicard-prog">
-        <ProgramIcon program={card.program} size={small ? 22 : 27} />
-        {card.programName}
+        <ProgramIcon program={card.program} size={small ? 9 : 21} />
       </span>
       <span className="minicard-chip" />
       {!small && <span className="minicard-name">{card.name}</span>}
