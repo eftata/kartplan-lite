@@ -1,11 +1,12 @@
 import { Link } from "../lib/router";
+import { Brand } from "../components/Brand";
 
 export function Landing() {
   return (
     <div className="landing">
       <header className="topbar topbar-plain">
         <span className="wordmark" aria-label="KartPlan">
-          Kart<em>Plan</em>
+          <Brand />
         </span>
         <nav className="landing-nav" aria-label="Ana menü">
           <Link href="/kesfet">Kampanyaları keşfet</Link>
