@@ -344,7 +344,15 @@ export function Explore() {
                     {catalog.filter((card) => card.program === source.program).length} kart seçeneği
                   </small>
                 </span>
-                <span aria-hidden="true">↗</span>
+                <a
+                  className="wallet-apply"
+                  href={source.applicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${source.bank} ${source.name} kredi kartına başvur`}
+                >
+                  Karta başvur ↗
+                </a>
               </div>
             ))}
           </div>
