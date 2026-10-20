@@ -28,7 +28,7 @@ export function Explore() {
           if (!response.ok) continue;
           const data = await response.json();
           if (active && Array.isArray(data.campaigns) && data.campaigns.length > 20)
-            setFeed((old) => (!old || data.updatedAt >= old.updatedAt ? data : old));
+            setFeed((old) => (!old || data.updatedAt > old.updatedAt ? data : old));
         } catch {
           /* Yerel veri ve elle doğrulanan seçki kullanılabilir. */
         }
