@@ -18,7 +18,7 @@ import {
   parsePercentInput,
   parseTlInput,
 } from "../lib/money";
-import { PROGRAMS, slugify } from "../lib/seed";
+import { PROGRAMS, SEED_CARDS, slugify } from "../lib/seed";
 import { useApp } from "../lib/store";
 import type { Benefit, Campaign, CampaignCategory, CatalogCard } from "../lib/types";
 
@@ -657,6 +657,12 @@ function CardRow({ card }: { card: CatalogCard }) {
         <button
           type="button"
           className="btn-text"
+          disabled={SEED_CARDS.some((seed) => seed.id === card.id)}
+          title={
+            SEED_CARDS.some((seed) => seed.id === card.id)
+              ? "Varsayılan kartlar silinemez"
+              : undefined
+          }
           onClick={() => confirm(`${card.name} katalogdan silinsin mi?`) && removeCard(card.id)}
         >
           Sil
