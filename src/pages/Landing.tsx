@@ -4,32 +4,46 @@ export function Landing() {
   return (
     <div className="landing">
       <header className="topbar topbar-plain">
-        <span className="wordmark">
+        <span className="wordmark" aria-label="KartPlan">
           Kart<em>Plan</em>
         </span>
-        <Link href="/giris" className="btn btn-ghost">
-          Giriş yap
-        </Link>
+        <nav className="landing-nav" aria-label="Ana menü">
+          <a href="#nasil-calisir">Nasıl çalışır?</a>
+          <Link href="/giris" className="btn btn-ghost">
+            Giriş yap
+          </Link>
+        </nav>
       </header>
 
       <section className="hero">
-        <p className="kicker">Kredi kartı kampanyaları, tek planda</p>
-        <h1>
-          Hangi harcamayı <em>hangi kartla</em> yapacağını bil.
-        </h1>
-        <p className="lead">
-          Kartlarını ve aylık harcamanı gir; KartPlan bankaların kampanyalarını tarayıp bu ay en çok
-          kazandıracak dağılımı çıkarsın. Kart numarası yok, banka şifresi yok.
-        </p>
-        <div className="hero-cta">
-          <Link href="/giris" className="btn btn-primary btn-lg">
-            Ücretsiz başla
-          </Link>
-          <span className="muted small">3 dakikada kurulum</span>
+        <div className="hero-copy">
+          <p className="kicker">Kartlarından daha fazlasını al</p>
+          <h1>
+            Her harcamaya <em>doğru kart.</em>
+          </h1>
+          <p className="lead">
+            Kartlarını ve aylık harcamalarını seç. KartPlan, kayıtlı kampanyalara göre hangi
+            alışverişte hangi kartın avantajlı olduğunu tek bir planda gösterir.
+          </p>
+          <div className="hero-cta">
+            <Link href="/giris" className="btn btn-primary btn-lg">
+              Planımı oluştur <span aria-hidden="true">↗</span>
+            </Link>
+            <span className="muted small">Ücretsiz · Yaklaşık 3 dakikada kurulum</span>
+          </div>
+          <p className="hero-reassurance">Kart numarası veya banka şifresi istemeyiz.</p>
         </div>
 
-        <div className="hero-demo" aria-hidden="true">
-          <span className="hero-demo-label">Örnek plan</span>
+        <div className="hero-demo" aria-label="Temsili aylık plan örneği">
+          <div className="demo-heading">
+            <span className="hero-demo-label">TEMSİLİ PLAN</span>
+            <span className="demo-month">Bu ay</span>
+          </div>
+          <p className="demo-title">
+            Harcamalarının
+            <br />
+            akıllı dağılımı
+          </p>
           <div className="demo-row">
             <span>🛒 Market</span>
             <span className="demo-card prog-bonus">Bonus</span>
@@ -46,13 +60,20 @@ export function Landing() {
             <strong className="num">+75 ₺</strong>
           </div>
           <div className="demo-total">
-            <span>Bu ay beklenen</span>
+            <span>Örnek toplam avantaj</span>
             <strong className="num">325 ₺</strong>
           </div>
+          <p className="demo-disclaimer">
+            Tutarlar örnektir; gerçek kazanç kampanya koşullarına bağlıdır.
+          </p>
         </div>
       </section>
 
-      <section className="steps">
+      <section className="steps" id="nasil-calisir" aria-labelledby="steps-title">
+        <div className="steps-heading">
+          <p className="kicker">Nasıl çalışır?</p>
+          <h2 id="steps-title">Üç adımda daha net kararlar.</h2>
+        </div>
         <div>
           <span className="step-no">01</span>
           <h3>Kartlarını seç</h3>
