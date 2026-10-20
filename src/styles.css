@@ -1,57 +1,35 @@
-/* KartPlan — palet: coolors “olive garden” (fefae0 · 283618 · 606c38 · dda15e · bc6c25)
-   Yazı: Fraunces (başlık, rakam), IBM Plex Sans (metin), IBM Plex Mono (etiket). */
+/* KartPlan — uygulama renkleri ve ortak tipografi. */
 
 :root {
-  --cream: #fefae0;
-  --olive-900: #283618;
-  --olive: #606c38;
-  --earth: #dda15e;
-  --tiger: #bc6c25;
+  --cream: #f6f8fc;
+  --olive-900: #172348;
+  --olive: #3e5bc1;
+  --earth: #e7b76b;
+  --tiger: #bd842f;
 
   --bg: var(--cream);
-  --surface: #fffef4;
-  --surface-2: #f4eed2;
+  --surface: #fff;
+  --surface-2: #edf1fa;
   --ink: var(--olive-900);
-  --ink-soft: #5d6548;
-  --line: rgb(40 54 24 / 0.13);
-  --line-strong: rgb(40 54 24 / 0.24);
+  --ink-soft: #687590;
+  --line: rgb(23 35 72 / 0.12);
+  --line-strong: rgb(23 35 72 / 0.22);
   --primary: var(--olive);
-  --primary-hover: #4f5a2c;
-  --on-primary: var(--cream);
+  --primary-hover: #304cae;
+  --on-primary: #fff;
   --accent: var(--tiger);
-  --accent-soft: #f7e6c8;
-  --pos: #4d6b1e;
+  --accent-soft: #fff1d9;
+  --pos: #237a57;
   --danger: #a3361f;
-  --shadow: 0 1px 0 rgb(40 54 24 / 0.04), 0 8px 24px -12px rgb(40 54 24 / 0.22);
+  --shadow: 0 1px 0 rgb(23 35 72 / 0.04), 0 8px 24px -12px rgb(23 35 72 / 0.2);
 
-  --display: "Fraunces Variable", "Fraunces", Georgia, serif;
-  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --display: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --sans: "Plus Jakarta Sans Variable", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --r: 14px;
   --r-sm: 9px;
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #171f0d;
-    --surface: #212c14;
-    --surface-2: #2a371a;
-    --ink: var(--cream);
-    --ink-soft: #c8c6a6;
-    --line: rgb(254 250 224 / 0.1);
-    --line-strong: rgb(254 250 224 / 0.22);
-    --primary: #a7b46a;
-    --primary-hover: #b9c57c;
-    --on-primary: #171f0d;
-    --accent: var(--earth);
-    --accent-soft: rgb(221 161 94 / 0.16);
-    --pos: #b6cc74;
-    --danger: #f08c6f;
-    --shadow: 0 10px 30px -14px rgb(0 0 0 / 0.6);
-    color-scheme: dark;
-  }
 }
 
 * {
@@ -140,16 +118,41 @@ code {
 }
 
 .wordmark {
-  font: 600 1.35rem/1 var(--display);
-  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
   color: var(--ink);
 }
 
-.wordmark em {
-  font-style: italic;
-  font-weight: 500;
-  color: var(--accent);
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #172854;
+  white-space: nowrap;
+}
+.brand-symbol {
+  display: block;
+  width: 39px;
+  height: 39px;
+  flex: none;
+}
+.brand-type {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.brand-type strong {
+  font: 800 22px/1 var(--display);
+  letter-spacing: -0.07em;
+}
+.brand-type strong span {
+  color: #3e60c3;
+}
+.brand-type small {
+  color: #75839a;
+  font: 700 8px/1 var(--sans);
+  letter-spacing: 0.18em;
 }
 
 /* ---------- butonlar ---------- */
@@ -2065,8 +2068,8 @@ button.admin-row:hover {
 
 /* Public campaign discovery */
 .discovery {
-  --navy: #111c30;
-  --blue: #284cbd;
+  --navy: #172348;
+  --blue: #3e5bc1;
   --pale: #f3f6fb;
   --border: #e3e8f0;
   min-height: 100vh;
@@ -2088,21 +2091,9 @@ button.admin-row:hover {
   border-bottom: 1px solid var(--border);
 }
 .discovery-logo {
-  color: var(--navy);
-  font: 800 23px/1 var(--sans);
-  letter-spacing: -0.075em;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
-  white-space: nowrap;
-}
-.discovery-logo span {
-  color: #e4a644;
-}
-.discovery-logo small {
-  display: block;
-  margin-top: 5px;
-  color: #788497;
-  font: 600 9px/1 var(--mono);
-  letter-spacing: 0.18em;
 }
 .discovery-topbar nav {
   display: flex;
@@ -2150,7 +2141,7 @@ button.admin-row:hover {
 .discovery-intro h1 {
   margin: 23px 0;
   color: var(--navy);
-  font: 650 clamp(50px, 6vw, 84px)/1.05 var(--display);
+  font: 780 clamp(48px, 5.6vw, 76px)/1.12 var(--display);
   letter-spacing: -0.065em;
 }
 .discovery-intro h1 em {
@@ -2215,7 +2206,7 @@ button.admin-row:hover {
 }
 .feature-bottom {
   align-items: end;
-  font: 500 26px/1.2 var(--display);
+  font: 700 25px/1.25 var(--display);
   letter-spacing: -0.03em;
 }
 .feature-bottom > span:last-child {
@@ -2241,7 +2232,7 @@ button.admin-row:hover {
   border-radius: 50%;
   background: linear-gradient(135deg, #fafcff, #bdcbef);
   color: #264ba9;
-  font: 600 79px var(--display);
+  font: 700 79px var(--display);
   box-shadow: 0 15px 34px #06174866;
 }
 .discovery-section {
@@ -2260,7 +2251,7 @@ button.admin-row:hover {
 .discovery-wallet h2 {
   margin-top: 9px;
   color: var(--navy);
-  font: 600 clamp(31px, 3.5vw, 44px)/1.12 var(--display);
+  font: 750 clamp(31px, 3.5vw, 44px)/1.12 var(--display);
   letter-spacing: -0.045em;
 }
 .discovery-section-title > span {
@@ -2465,7 +2456,7 @@ button.admin-row:hover {
 .offer-content h3 {
   margin: 12px 0 10px;
   color: var(--navy);
-  font: 600 20px/1.24 var(--display);
+  font: 720 19px/1.35 var(--display);
   letter-spacing: -0.035em;
 }
 .offer-facts {
@@ -2608,6 +2599,19 @@ button.admin-row:hover {
   justify-content: space-between;
   color: #56667c;
   font-weight: 800;
+  align-items: center;
+}
+.discovery-footer > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+}
+.discovery-footer .brand-symbol {
+  width: 28px;
+  height: 28px;
+}
+.discovery-footer .brand-type strong {
+  font-size: 17px;
 }
 .discovery-footer small {
   margin-left: 12px;
