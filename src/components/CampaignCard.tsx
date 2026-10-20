@@ -1,7 +1,7 @@
 import { useId, useState } from "react";
 import type { ExternalCampaign } from "../lib/externalCampaigns";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
-import { ProgramIcon } from "./ProgramIcon";
+import { BankLogo, ProgramIcon } from "./ProgramIcon";
 
 export function CampaignCard({ campaign, today }: { campaign: ExternalCampaign; today: string }) {
   const source = CAMPAIGN_SOURCES.find((item) => item.program === campaign.program);
@@ -39,8 +39,10 @@ export function CampaignCard({ campaign, today }: { campaign: ExternalCampaign; 
       <div className="campaign-card-top">
         <div className="campaign-bank">
           <ProgramIcon program={campaign.program} size={30} />
-          <strong>{source?.name ?? campaign.program}</strong>
-          <span>{source?.bank ?? "KartPlan seçkisi"}</span>
+          <strong className="visually-hidden">{source?.name ?? campaign.program}</strong>
+          <span className="campaign-bank-logo">
+            <BankLogo program={campaign.program} />
+          </span>
         </div>
         <span className={`campaign-deadline ${days !== null && days <= 7 ? "ending" : ""}`}>
           {days === 0
@@ -105,6 +107,22 @@ export function CampaignCard({ campaign, today }: { campaign: ExternalCampaign; 
           </p>
         </div>
       </div>
+      {source && (
+        <div className="campaign-application">
+          <div>
+            <strong>{source.name} kartın yok mu?</strong>
+            <span>Başvurunu {source.bank} üzerinden tamamla.</span>
+          </div>
+          <a
+            href={source.applicationUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${source.bank} ${source.name} kredi kartı başvuru sayfasına git`}
+          >
+            {source.name} karta başvur <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      )}
       <details className="campaign-details">
         <summary>
           <span>Kampanya detaylarını incele</span>
