@@ -8,6 +8,7 @@ export function Landing() {
           Kart<em>Plan</em>
         </span>
         <nav className="landing-nav" aria-label="Ana menü">
+          <Link href="/kesfet">Kampanyaları keşfet</Link>
           <a href="#nasil-calisir">Nasıl çalışır?</a>
           <Link href="/giris" className="btn btn-ghost">
             Giriş yap
@@ -19,15 +20,18 @@ export function Landing() {
         <div className="hero-copy">
           <p className="kicker">Kartlarından daha fazlasını al</p>
           <h1>
-            Her harcamaya <em>doğru kart.</em>
+            Kart kampanyalarını <em>tek yerden keşfet.</em>
           </h1>
           <p className="lead">
-            Kartlarını ve aylık harcamalarını seç. KartPlan, kayıtlı kampanyalara göre hangi
-            alışverişte hangi kartın avantajlı olduğunu tek bir planda gösterir.
+            Bankaların güncel kampanya sayfalarına ulaş. Kendi kartlarını ekle; yayınlanan
+            kampanyaları kartlarına göre takip et ve harcamanı planla.
           </p>
           <div className="hero-cta">
+            <Link href="/kesfet" className="btn btn-primary btn-lg">
+              Kampanyaları keşfet <span aria-hidden="true">↗</span>
+            </Link>
             <Link href="/giris" className="btn btn-primary btn-lg">
-              Planımı oluştur <span aria-hidden="true">↗</span>
+              Kartlarımı ekle
             </Link>
             <span className="muted small">Ücretsiz · Yaklaşık 3 dakikada kurulum</span>
           </div>
