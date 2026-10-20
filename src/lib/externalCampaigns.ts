@@ -8,6 +8,12 @@ export type ExternalCampaign = {
   benefit: string;
   endsAt: string;
   sourceUrl: string;
+  imageUrl?: string;
+  conditions?: string[];
+  participation?: string;
+  spendCondition?: string;
+  eligibility?: string;
+  checkedAt?: string;
 };
 
 export const EXTERNAL_CAMPAIGNS: ExternalCampaign[] = [
