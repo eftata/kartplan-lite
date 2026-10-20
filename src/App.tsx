@@ -7,7 +7,6 @@ import { Admin } from "./pages/Admin";
 import { Calculator } from "./pages/Calculator";
 import { Campaigns } from "./pages/Campaigns";
 import { Explore } from "./pages/Explore";
-import { Landing } from "./pages/Landing";
 import { MyCards } from "./pages/MyCards";
 import { Onboarding } from "./pages/Onboarding";
 import { Plan } from "./pages/Plan";
@@ -44,7 +43,7 @@ export function App() {
   if (path === "/aydinlatma") return <Privacy />;
   if (path === "/kesfet") return <Explore />;
   if (!authReady || (user && profile === undefined)) return <Splash />;
-  if (!user) return path === "/giris" ? <SignIn /> : <Landing />;
+  if (!user) return path === "/giris" ? <SignIn /> : <Explore />;
   // Admin, katalog boşken de (kendi kurulumundan önce) yönetim sayfasına girebilir.
   if (path === "/admin" && admin) {
     return (
