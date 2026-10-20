@@ -208,6 +208,7 @@ export function Explore() {
           <div className="discovery-programs" aria-label="Kart programı filtresi">
             <button
               className={!program ? "active" : ""}
+              aria-pressed={!program}
               onClick={() => {
                 setProgram("");
                 setPage(1);
@@ -219,6 +220,7 @@ export function Explore() {
               <button
                 key={source.program}
                 className={program === source.program ? "active" : ""}
+                aria-pressed={program === source.program}
                 onClick={() => {
                   setProgram(source.program);
                   setPage(1);
