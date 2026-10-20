@@ -72,11 +72,11 @@ export function CampaignCard({ campaign, today }: { campaign: ExternalCampaign; 
         <div className="campaign-copy">
           <span className="campaign-sector">{campaign.category} fırsatı</span>
           <h3 id={headingId}>{campaign.title}</h3>
-          <p>
-            {campaign.summary ||
-              "Bu kampanyanın ayrıntılı koşulları henüz alınamadı. Resmi banka sayfasından katılım ve kart uygunluğunu kontrol edebilirsin."}
-          </p>
         </div>
+        <p className="campaign-description">
+          {campaign.summary ||
+            "Bu kampanyanın ayrıntılı koşulları henüz alınamadı. Resmi banka sayfasından katılım ve kart uygunluğunu kontrol edebilirsin."}
+        </p>
         <div className="campaign-reward">
           <span>SUNULAN AVANTAJ</span>
           <strong>{campaign.benefit || "Özel fırsat"}</strong>
