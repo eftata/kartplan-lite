@@ -4299,16 +4299,6 @@
       "sourceUrl": "https://www.worldcard.com.tr/kampanyalar/koctas-magazalarinda-chippin-uygulamasi-uzerinden-yapacaginiz-alisverislerde-550-tlye-varanworldpuan"
     },
     {
-      "id": "be157a311cbc16b7",
-      "program": "world",
-      "title": "World’ün 35. Yılına Özel Penti’de 335 TL Penti puan!",
-      "category": "Seyahat",
-      "summary": "",
-      "benefit": "335 TL",
-      "endsAt": "2026-10-31",
-      "sourceUrl": "https://www.worldcard.com.tr/kampanyalar/silver-logolu-mastercard-iniz-ile-yurt-disindaki-otel-harcamalarinizda-10-indirim-ayricaligi"
-    },
-    {
       "id": "fa45dacbc8fc21da",
       "program": "world",
       "title": "Trendyol’da peşin fiyatına 3 ve 6 taksit!",
@@ -4967,6 +4957,16 @@
       "benefit": "750 TL",
       "endsAt": "2026-10-31",
       "sourceUrl": "https://www.worldcard.com.tr/kampanyalar/ipekyolda-750-tl-ipekyol-puan-ekim"
+    },
+    {
+      "id": "64aa70e320d5df81",
+      "program": "world",
+      "title": "Twist’te 750 TL Twist Puan! Chippin uygulaması üzerinden Twist fiziki mağazalarından yapacağınız alışverişinize ek 50 TL Twist Puan!",
+      "category": "Diğer",
+      "summary": "",
+      "benefit": "750 TL",
+      "endsAt": "2026-10-31",
+      "sourceUrl": "https://www.worldcard.com.tr/kampanyalar/twistte-750-tl-twist-puan-ekim"
     },
     {
       "id": "74d958d4201a3ca5",
