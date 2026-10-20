@@ -9,6 +9,8 @@ export function Explore() {
   const { user, catalog, campaigns, profile, today } = useApp();
   const [program, setProgram] = useState("");
   const [category, setCategory] = useState("Tümü");
+  const [kind, setKind] = useState("Tümü");
+  const [order, setOrder] = useState("karisik");
   const [onlyMine, setOnlyMine] = useState(false);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -24,7 +26,7 @@ export function Explore() {
       ];
       for (const url of urls) {
         try {
-          const response = await fetch(url);
+          const response = await fetch(url, { cache: "no-store" });
           if (!response.ok) continue;
           const data = await response.json();
           if (active && Array.isArray(data.campaigns) && data.campaigns.length > 20)
@@ -66,16 +68,46 @@ export function Explore() {
     ...curated,
   ];
   const categories = ["Tümü", ...new Set(current.map((campaign) => campaign.category))];
-  const visible = current.filter(
+  const filtered = current.filter(
     (campaign) =>
       (!program || campaign.program === program) &&
       (category === "Tümü" || campaign.category === category) &&
+      (kind === "Tümü" ||
+        (
+          {
+            Puan: /puan|bonus|chip-para|mil/i,
+            İndirim: /indirim/i,
+            Taksit: /taksit/i,
+            Nakit: /nakit|avans/i,
+          }[kind] as RegExp
+        ).test(`${campaign.title} ${campaign.benefit}`)) &&
       (!onlyMine || owned.has(campaign.program)) &&
       (!query ||
         `${campaign.title} ${campaign.summary} ${campaign.category}`
           .toLocaleLowerCase("tr")
           .includes(query.toLocaleLowerCase("tr"))),
   );
+  const visible =
+    order === "bitis"
+      ? [...filtered].sort((a, b) => (a.endsAt || "9999").localeCompare(b.endsAt || "9999"))
+      : (() => {
+          const groups = CAMPAIGN_SOURCES.map((source) =>
+            filtered.filter((campaign) => campaign.program === source.program),
+          );
+          const other = filtered.filter(
+            (campaign) => !CAMPAIGN_SOURCES.some((source) => source.program === campaign.program),
+          );
+          const mixed: ExternalCampaign[] = [];
+          for (let i = 0; mixed.length < filtered.length; i++) {
+            for (const group of groups) {
+              const campaign = group[i];
+              if (campaign) mixed.push(campaign);
+            }
+            const extra = other[i];
+            if (extra) mixed.push(extra);
+          }
+          return mixed;
+        })();
 
   return (
     <div className="discovery">
@@ -142,19 +174,28 @@ export function Explore() {
             <span>
               {visible.length} kampanya ·{" "}
               {feed?.updatedAt
-                ? `${new Date(`${feed.updatedAt}T12:00:00`).toLocaleDateString("tr-TR")} güncellendi`
+                ? `${new Date(feed.updatedAt).toLocaleDateString("tr-TR")} güncellendi`
                 : "Doğrulanan seçki"}
             </span>
           </div>
           <div className="discovery-programs" aria-label="Kart programı filtresi">
-            <button className={!program ? "active" : ""} onClick={() => setProgram("")}>
+            <button
+              className={!program ? "active" : ""}
+              onClick={() => {
+                setProgram("");
+                setPage(1);
+              }}
+            >
               Tüm kartlar
             </button>
             {CAMPAIGN_SOURCES.map((source) => (
               <button
                 key={source.program}
                 className={program === source.program ? "active" : ""}
-                onClick={() => setProgram(source.program)}
+                onClick={() => {
+                  setProgram(source.program);
+                  setPage(1);
+                }}
               >
                 {source.name}
               </button>
@@ -163,10 +204,45 @@ export function Explore() {
           <div className="discovery-controls">
             <label>
               Kategori{" "}
-              <select value={category} onChange={(event) => setCategory(event.target.value)}>
+              <select
+                value={category}
+                onChange={(event) => {
+                  setCategory(event.target.value);
+                  setPage(1);
+                }}
+              >
                 {categories.map((item) => (
                   <option key={item}>{item}</option>
                 ))}
+              </select>
+            </label>
+            <label>
+              Fırsat türü{" "}
+              <select
+                value={kind}
+                onChange={(event) => {
+                  setKind(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option>Tümü</option>
+                <option>Puan</option>
+                <option>İndirim</option>
+                <option>Taksit</option>
+                <option>Nakit</option>
+              </select>
+            </label>
+            <label>
+              Sıralama{" "}
+              <select
+                value={order}
+                onChange={(event) => {
+                  setOrder(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="karisik">Bankalara dengeli</option>
+                <option value="bitis">Yakında bitecek</option>
               </select>
             </label>
             {user && (
@@ -176,7 +252,7 @@ export function Explore() {
                   checked={onlyMine}
                   onChange={(event) => setOnlyMine(event.target.checked)}
                 />{" "}
-                Yalnızca kartlarım
+                Programlarıma göre
               </label>
             )}
             <input
@@ -200,9 +276,12 @@ export function Explore() {
                   <article className={`offer-card offer-${campaign.program}`} key={campaign.id}>
                     <div className="offer-meta">
                       <span className="offer-bank-mark">
-                        <ProgramIcon program={campaign.program} size={30} />
+                        <ProgramIcon program={campaign.program} size={34} />
                       </span>
-                      <span>{source?.name ?? campaign.program}</span>
+                      <span className="offer-source">
+                        <strong>{source?.name ?? campaign.program}</strong>
+                        <small>{source?.bank ?? "KartPlan"}</small>
+                      </span>
                       <span className="offer-category">{campaign.category}</span>
                     </div>
                     <div className="offer-content">
@@ -212,22 +291,26 @@ export function Explore() {
                       <h3>{campaign.title}</h3>
                       {campaign.summary && <p>{campaign.summary}</p>}
                     </div>
-                    <div className="offer-footer">
-                      <span>
-                        {campaign.endsAt ? (
-                          <>
-                            Son gün{" "}
-                            <strong>
-                              {new Date(`${campaign.endsAt}T12:00:00`).toLocaleDateString("tr-TR", {
+                    <div className="offer-facts">
+                      <div>
+                        <small>SEKTÖR</small>
+                        <strong>{campaign.category}</strong>
+                      </div>
+                      <div>
+                        <small>GEÇERLİLİK</small>
+                        <strong>
+                          {campaign.endsAt
+                            ? new Date(`${campaign.endsAt}T12:00:00`).toLocaleDateString("tr-TR", {
                                 day: "numeric",
                                 month: "long",
-                              })}
-                            </strong>
-                          </>
-                        ) : (
-                          "Resmi listede"
-                        )}
-                      </span>
+                                year: "numeric",
+                              })
+                            : "Bankada teyit et"}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="offer-footer">
+                      <span>Resmi banka kaynağı</span>
                       {campaign.sourceUrl && (
                         <a
                           href={campaign.sourceUrl}
