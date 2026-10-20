@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ProgramIcon } from "../components/ProgramIcon";
 import { EXTERNAL_CAMPAIGNS, type ExternalCampaign } from "../lib/externalCampaigns";
 import { Link } from "../lib/router";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
@@ -9,6 +10,35 @@ export function Explore() {
   const [program, setProgram] = useState("");
   const [category, setCategory] = useState("Tümü");
   const [onlyMine, setOnlyMine] = useState(false);
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [feed, setFeed] = useState<{ updatedAt: string; campaigns: ExternalCampaign[] } | null>(
+    null,
+  );
+  useEffect(() => {
+    let active = true;
+    async function loadFeed() {
+      const urls = [
+        `/campaign-feed.json?v=${today}`,
+        `https://raw.githubusercontent.com/eftata/kartplan-lite/main/public/campaign-feed.json?v=${today}`,
+      ];
+      for (const url of urls) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) continue;
+          const data = await response.json();
+          if (active && Array.isArray(data.campaigns) && data.campaigns.length > 20)
+            setFeed((old) => (!old || data.updatedAt >= old.updatedAt ? data : old));
+        } catch {
+          /* Yerel veri ve elle doğrulanan seçki kullanılabilir. */
+        }
+      }
+    }
+    void loadFeed();
+    return () => {
+      active = false;
+    };
+  }, [today]);
   const owned = new Set(
     catalog.filter((card) => profile?.cardIds.includes(card.id)).map((card) => card.program),
   );
@@ -30,8 +60,9 @@ export function Explore() {
       endsAt: campaign.endsAt,
       sourceUrl: campaign.url,
     }));
+  const external = feed?.campaigns ?? EXTERNAL_CAMPAIGNS;
   const current = [
-    ...EXTERNAL_CAMPAIGNS.filter((campaign) => campaign.endsAt >= today),
+    ...external.filter((campaign) => !campaign.endsAt || campaign.endsAt >= today),
     ...curated,
   ];
   const categories = ["Tümü", ...new Set(current.map((campaign) => campaign.category))];
@@ -39,7 +70,11 @@ export function Explore() {
     (campaign) =>
       (!program || campaign.program === program) &&
       (category === "Tümü" || campaign.category === category) &&
-      (!onlyMine || owned.has(campaign.program)),
+      (!onlyMine || owned.has(campaign.program)) &&
+      (!query ||
+        `${campaign.title} ${campaign.summary} ${campaign.category}`
+          .toLocaleLowerCase("tr")
+          .includes(query.toLocaleLowerCase("tr"))),
   );
 
   return (
@@ -102,9 +137,14 @@ export function Explore() {
           <div className="discovery-section-title">
             <div>
               <p className="discovery-eyebrow">KEŞFET</p>
-              <h2>Güncel kampanyalar</h2>
+              <h2>Kart kampanyaları</h2>
             </div>
-            <span>{visible.length} kampanya gösteriliyor</span>
+            <span>
+              {visible.length} kampanya ·{" "}
+              {feed?.updatedAt
+                ? `${new Date(`${feed.updatedAt}T12:00:00`).toLocaleDateString("tr-TR")} güncellendi`
+                : "Doğrulanan seçki"}
+            </span>
           </div>
           <div className="discovery-programs" aria-label="Kart programı filtresi">
             <button className={!program ? "active" : ""} onClick={() => setProgram("")}>
@@ -139,33 +179,54 @@ export function Explore() {
                 Yalnızca kartlarım
               </label>
             )}
-            <span>Özetler bankaların resmi kampanya sayfalarından derlenmiştir.</span>
+            <input
+              className="discovery-search"
+              type="search"
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
+              placeholder="Kampanya ara…"
+              aria-label="Kampanya ara"
+            />
+            <span>Resmi kaynaklardaki herkese açık kampanyalar.</span>
           </div>
           {visible.length ? (
             <div className="discovery-grid">
-              {visible.map((campaign) => {
+              {visible.slice(0, page * 24).map((campaign) => {
                 const source = CAMPAIGN_SOURCES.find((item) => item.program === campaign.program);
                 return (
                   <article className={`offer-card offer-${campaign.program}`} key={campaign.id}>
                     <div className="offer-meta">
-                      <span className="offer-bank-mark">{source?.name.slice(0, 1) ?? "K"}</span>
+                      <span className="offer-bank-mark">
+                        <ProgramIcon program={campaign.program} size={30} />
+                      </span>
                       <span>{source?.name ?? campaign.program}</span>
                       <span className="offer-category">{campaign.category}</span>
                     </div>
                     <div className="offer-content">
-                      <span className="offer-benefit">{campaign.benefit}</span>
+                      {campaign.benefit && (
+                        <span className="offer-benefit">{campaign.benefit}</span>
+                      )}
                       <h3>{campaign.title}</h3>
-                      <p>{campaign.summary}</p>
+                      {campaign.summary && <p>{campaign.summary}</p>}
                     </div>
                     <div className="offer-footer">
                       <span>
-                        Son gün{" "}
-                        <strong>
-                          {new Date(`${campaign.endsAt}T12:00:00`).toLocaleDateString("tr-TR", {
-                            day: "numeric",
-                            month: "long",
-                          })}
-                        </strong>
+                        {campaign.endsAt ? (
+                          <>
+                            Son gün{" "}
+                            <strong>
+                              {new Date(`${campaign.endsAt}T12:00:00`).toLocaleDateString("tr-TR", {
+                                day: "numeric",
+                                month: "long",
+                              })}
+                            </strong>
+                          </>
+                        ) : (
+                          "Resmi listede"
+                        )}
                       </span>
                       {campaign.sourceUrl && (
                         <a
@@ -188,9 +249,16 @@ export function Explore() {
               seçebilirsin.
             </div>
           )}
+          {visible.length > page * 24 && (
+            <button className="discovery-more" type="button" onClick={() => setPage(page + 1)}>
+              Daha fazla kampanya göster{" "}
+              <span>{Math.min(visible.length - page * 24, 24)} sonraki</span>
+            </button>
+          )}
           <p className="discovery-footnote">
-            Kampanya şartları, kart uygunluğu ve katılım adımları değişebilir. İşlemden önce
-            bankanın kendi sayfasından teyit edin.
+            Kart uygunluğu ve katılım koşulları kampanyaya göre değişir; seçtiğin programdaki tüm
+            kartların uygun olduğu anlamına gelmez. Axess için yalnızca açık sayfada listelenen
+            kampanyalar görüntülenir. İşlemden önce bankada teyit edin.
           </p>
         </section>
         <section className="discovery-wallet" id="kartlar">
@@ -209,7 +277,7 @@ export function Explore() {
             {CAMPAIGN_SOURCES.map((source) => (
               <div key={source.program}>
                 <span className={`wallet-mark wallet-${source.program}`}>
-                  {source.name.slice(0, 1)}
+                  <ProgramIcon program={source.program} size={38} />
                 </span>
                 <span>
                   <strong>{source.name}</strong>
