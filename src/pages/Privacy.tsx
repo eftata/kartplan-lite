@@ -1,11 +1,12 @@
 import { Link } from "../lib/router";
+import { Brand } from "../components/Brand";
 
 export function Privacy() {
   return (
     <div className="center-page">
       <article className="panel prose">
         <Link href="/" className="wordmark">
-          Kart<em>Plan</em>
+          <Brand />
         </Link>
         <h1>Aydınlatma metni</h1>
         <p className="muted small">Sürüm 1 · Taslak, hukuki inceleme bekliyor.</p>
