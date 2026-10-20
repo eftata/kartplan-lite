@@ -1,156 +1,232 @@
 import { useState } from "react";
+import { EXTERNAL_CAMPAIGNS, type ExternalCampaign } from "../lib/externalCampaigns";
 import { Link } from "../lib/router";
-import { useApp } from "../lib/store";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
+import { useApp } from "../lib/store";
 
 export function Explore() {
-  const { user, catalog, campaigns, today } = useApp();
+  const { user, catalog, campaigns, profile, today } = useApp();
   const [program, setProgram] = useState("");
-  const sources = CAMPAIGN_SOURCES.filter((source) => !program || source.program === program);
-  const cards = catalog.filter((card) => !program || card.program === program);
-  const active = campaigns
+  const [category, setCategory] = useState("Tümü");
+  const [onlyMine, setOnlyMine] = useState(false);
+  const owned = new Set(
+    catalog.filter((card) => profile?.cardIds.includes(card.id)).map((card) => card.program),
+  );
+  const curated: ExternalCampaign[] = campaigns
     .filter(
       (campaign) =>
         campaign.status === "yayinda" &&
         !campaign.demo &&
         campaign.startsAt <= today &&
-        campaign.endsAt >= today &&
-        (!program || campaign.program === program),
+        campaign.endsAt >= today,
     )
-    .sort((a, b) => a.endsAt.localeCompare(b.endsAt));
+    .map((campaign) => ({
+      id: campaign.id,
+      program: campaign.program,
+      category: campaign.category === "tumu" ? "Genel" : campaign.category,
+      title: campaign.title,
+      summary: campaign.summary,
+      benefit: "KartPlan seçkisi",
+      endsAt: campaign.endsAt,
+      sourceUrl: campaign.url,
+    }));
+  const current = [
+    ...EXTERNAL_CAMPAIGNS.filter((campaign) => campaign.endsAt >= today),
+    ...curated,
+  ];
+  const categories = ["Tümü", ...new Set(current.map((campaign) => campaign.category))];
+  const visible = current.filter(
+    (campaign) =>
+      (!program || campaign.program === program) &&
+      (category === "Tümü" || campaign.category === category) &&
+      (!onlyMine || owned.has(campaign.program)),
+  );
 
   return (
-    <div className="explore">
-      <header className="topbar topbar-plain">
-        <Link href="/" className="wordmark" aria-label="KartPlan ana sayfa">
-          Kart<em>Plan</em>
+    <div className="discovery">
+      <header className="discovery-topbar">
+        <Link href="/kesfet" className="discovery-logo" aria-label="KartPlan ana sayfa">
+          K<span>·</span>PLAN <small>KART KAMPANYALARI</small>
         </Link>
-        <nav className="landing-nav" aria-label="Ana menü">
-          <Link href="/kesfet">Keşfet</Link>
-          <Link href={user ? "/kartlarim" : "/giris"} className="btn btn-primary">
-            {user ? "Kartlarım" : "Kartlarımı ekle"}
+        <nav aria-label="Ana menü">
+          <a href="#kampanyalar">Kampanyalar</a>
+          <a href="#kartlar">Kartlar</a>
+          <Link href={user ? "/plan" : "/giris"} className="discovery-login">
+            {user ? "Panelime git" : "Giriş yap"} ↗
           </Link>
         </nav>
       </header>
-
-      <main className="explore-main">
-        <div className="explore-hero">
-          <p className="kicker">Kart kampanyaları</p>
-          <h1>
-            Fırsatları keşfet.
-            <br />
-            <em>Kartlarını takip et.</em>
-          </h1>
-          <p>
-            Bankaların güncel kampanya sayfalarına ulaş, KartPlan'da yayınlanan kampanyaları gör ve
-            kendi kartlarını ekleyerek sana uygun fırsatları ayır.
-          </p>
-        </div>
-
-        <div className="explore-filters" aria-label="Kart programı filtresi">
-          <button className={!program ? "selected" : ""} onClick={() => setProgram("")}>
-            Tümü
-          </button>
-          {CAMPAIGN_SOURCES.map((source) => (
-            <button
-              key={source.program}
-              className={program === source.program ? "selected" : ""}
-              onClick={() => setProgram(source.program)}
-            >
-              {source.name}
-            </button>
-          ))}
-        </div>
-
-        <section className="explore-section" aria-labelledby="sources-title">
-          <div className="explore-section-head">
-            <div>
-              <p className="kicker">Resmi kaynaklar</p>
-              <h2 id="sources-title">Güncel kampanyalara git</h2>
-            </div>
-            <p>Kampanya koşulları ve geçerlilik tarihleri bankanın sayfasında yer alır.</p>
-          </div>
-          <div className="source-grid">
-            {sources.map((source) => (
-              <a
-                className={`source-card prog-${source.program}`}
-                key={source.program}
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="source-icon">{source.name.slice(0, 1)}</span>
-                <span className="source-bank">{source.bank}</span>
-                <strong>{source.name} kampanyaları</strong>
-                <span className="source-action">
-                  Resmi sayfayı aç <span aria-hidden="true">↗</span>
-                </span>
+      <main className="discovery-main">
+        <section className="discovery-intro">
+          <div>
+            <p className="discovery-eyebrow">
+              <span className="live-dot" /> KART KAMPANYALARI
+            </p>
+            <h1>
+              Kartının fırsatları.
+              <br />
+              <em>Tek bir yerde.</em>
+            </h1>
+            <p className="discovery-lead">
+              Bonus, Maximum, World, Axess ve Paraf kampanyalarını burada incele. Kartlarını
+              ekleyerek sana uygun fırsatlara odaklan.
+            </p>
+            <div className="discovery-actions">
+              <a href="#kampanyalar" className="discovery-primary">
+                Kampanyaları incele ↗
               </a>
-            ))}
+              <Link href={user ? "/kartlarim" : "/giris"} className="discovery-secondary">
+                Kartlarımı ekle
+              </Link>
+            </div>
+          </div>
+          <div className="discovery-feature" aria-hidden="true">
+            <div className="feature-top">
+              <span>01 / 05</span>
+              <span>FIRSAT RADARI</span>
+            </div>
+            <div className="feature-orbit">
+              <span>₺</span>
+            </div>
+            <div className="feature-bottom">
+              <span>
+                Fırsatları gör.
+                <br />
+                Koşulları teyit et.
+              </span>
+              <span>↗</span>
+            </div>
           </div>
         </section>
-
-        <section className="explore-section" aria-labelledby="campaign-title">
-          <div className="explore-section-head">
+        <section className="discovery-section" id="kampanyalar">
+          <div className="discovery-section-title">
             <div>
-              <p className="kicker">KartPlan seçkisi</p>
-              <h2 id="campaign-title">Yayınlanan kampanyalar</h2>
+              <p className="discovery-eyebrow">KEŞFET</p>
+              <h2>Güncel kampanyalar</h2>
             </div>
-            <p>Yönetici tarafından eklenen, süresi devam eden kampanyalar.</p>
+            <span>{visible.length} kampanya gösteriliyor</span>
           </div>
-          {active.length ? (
-            <div className="explore-campaigns">
-              {active.map((campaign) => (
-                <article className="explore-campaign" key={campaign.id}>
-                  <span className="pill">
-                    {CAMPAIGN_SOURCES.find((source) => source.program === campaign.program)?.name ??
-                      campaign.program}
-                  </span>
-                  <h3>{campaign.title}</h3>
-                  <p>{campaign.summary}</p>
-                  <div className="explore-campaign-foot">
-                    <span>{campaign.endsAt} tarihine kadar</span>
-                    {campaign.url && (
-                      <a href={campaign.url} target="_blank" rel="noopener noreferrer">
-                        Koşulları incele ↗
-                      </a>
-                    )}
-                  </div>
-                </article>
-              ))}
+          <div className="discovery-programs" aria-label="Kart programı filtresi">
+            <button className={!program ? "active" : ""} onClick={() => setProgram("")}>
+              Tüm kartlar
+            </button>
+            {CAMPAIGN_SOURCES.map((source) => (
+              <button
+                key={source.program}
+                className={program === source.program ? "active" : ""}
+                onClick={() => setProgram(source.program)}
+              >
+                {source.name}
+              </button>
+            ))}
+          </div>
+          <div className="discovery-controls">
+            <label>
+              Kategori{" "}
+              <select value={category} onChange={(event) => setCategory(event.target.value)}>
+                {categories.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
+              </select>
+            </label>
+            {user && (
+              <label className="mine-control">
+                <input
+                  type="checkbox"
+                  checked={onlyMine}
+                  onChange={(event) => setOnlyMine(event.target.checked)}
+                />{" "}
+                Yalnızca kartlarım
+              </label>
+            )}
+            <span>Özetler bankaların resmi kampanya sayfalarından derlenmiştir.</span>
+          </div>
+          {visible.length ? (
+            <div className="discovery-grid">
+              {visible.map((campaign) => {
+                const source = CAMPAIGN_SOURCES.find((item) => item.program === campaign.program);
+                return (
+                  <article className={`offer-card offer-${campaign.program}`} key={campaign.id}>
+                    <div className="offer-meta">
+                      <span className="offer-bank-mark">{source?.name.slice(0, 1) ?? "K"}</span>
+                      <span>{source?.name ?? campaign.program}</span>
+                      <span className="offer-category">{campaign.category}</span>
+                    </div>
+                    <div className="offer-content">
+                      <span className="offer-benefit">{campaign.benefit}</span>
+                      <h3>{campaign.title}</h3>
+                      <p>{campaign.summary}</p>
+                    </div>
+                    <div className="offer-footer">
+                      <span>
+                        Son gün{" "}
+                        <strong>
+                          {new Date(`${campaign.endsAt}T12:00:00`).toLocaleDateString("tr-TR", {
+                            day: "numeric",
+                            month: "long",
+                          })}
+                        </strong>
+                      </span>
+                      {campaign.sourceUrl && (
+                        <a
+                          href={campaign.sourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${campaign.title} koşullarını bankada teyit et`}
+                        >
+                          Bankada teyit et ↗
+                        </a>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           ) : (
-            <div className="explore-note">
-              Bu program için KartPlan'da yayınlanmış güncel kampanya yok. Yukarıdaki resmi
-              kaynaklarda fırsatları inceleyebilirsin.
+            <div className="discovery-empty">
+              Bu filtrede süresi devam eden kampanya bulunamadı. Başka bir kart veya kategori
+              seçebilirsin.
             </div>
           )}
+          <p className="discovery-footnote">
+            Kampanya şartları, kart uygunluğu ve katılım adımları değişebilir. İşlemden önce
+            bankanın kendi sayfasından teyit edin.
+          </p>
         </section>
-
-        <section className="explore-section" aria-labelledby="cards-title">
-          <div className="explore-section-head">
-            <div>
-              <p className="kicker">Başlangıç kataloğu</p>
-              <h2 id="cards-title">Kartlarını seçmeye başla</h2>
-            </div>
-            <p>Kart numarası gerekmez. Sahip olduğun kartların adını seçmen yeterli.</p>
+        <section className="discovery-wallet" id="kartlar">
+          <div>
+            <p className="discovery-eyebrow">KİŞİSEL TAKİP</p>
+            <h2>Hangi kartlar sende?</h2>
+            <p>
+              Kart numarası veya banka şifresi paylaşmadan kartlarını seç. Kampanyaları kendi
+              kartlarına göre filtrele, katıldıklarını takip et.
+            </p>
+            <Link href={user ? "/kartlarim" : "/giris"} className="discovery-primary">
+              Kartlarımı yönet ↗
+            </Link>
           </div>
-          <div className="explore-card-list">
-            {cards.map((card) => (
-              <span key={card.id} className="explore-card-name">
-                <span className={`dot prog-${card.program}`} />
-                {card.name}
-                <small>{card.bank}</small>
-              </span>
+          <div className="wallet-programs">
+            {CAMPAIGN_SOURCES.map((source) => (
+              <div key={source.program}>
+                <span className={`wallet-mark wallet-${source.program}`}>
+                  {source.name.slice(0, 1)}
+                </span>
+                <span>
+                  <strong>{source.name}</strong>
+                  <small>
+                    {catalog.filter((card) => card.program === source.program).length} kart seçeneği
+                  </small>
+                </span>
+                <span aria-hidden="true">↗</span>
+              </div>
             ))}
           </div>
-          <Link href={user ? "/kartlarim" : "/giris"} className="btn btn-primary">
-            {user ? "Kartlarımı yönet" : "Kartlarımı ekle"} ↗
-          </Link>
         </section>
       </main>
-      <footer className="footer">
-        <span>KartPlan · bağımsız bir araçtır, hiçbir bankayla bağlantılı değildir.</span>
+      <footer className="discovery-footer">
+        <span>
+          K·PLAN <small>Bağımsız kampanya takip aracı</small>
+        </span>
         <Link href="/aydinlatma">Aydınlatma metni</Link>
       </footer>
     </div>
