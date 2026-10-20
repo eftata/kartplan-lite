@@ -38,7 +38,13 @@ export function watchCards(cb: (cards: CatalogCard[]) => void, onError: (e: Erro
   return onSnapshot(
     collection(fb().db, "cards"),
     (snap) => {
-      const cards = snap.docs.map((d) => ({ ...(d.data() as Omit<CatalogCard, "id">), id: d.id }));
+      // Başlangıç kartları veritabanı henüz kurulmamış olsa da görünür.
+      // Yönetici tarafından kaydedilen sürüm aynı kimlikli varsayılan kartın yerini alır.
+      const byId = new Map(SEED_CARDS.map((card) => [card.id, card]));
+      snap.docs.forEach((d) =>
+        byId.set(d.id, { ...(d.data() as Omit<CatalogCard, "id">), id: d.id }),
+      );
+      const cards = [...byId.values()];
       cards.sort(
         (a, b) =>
           a.programName.localeCompare(b.programName, "tr") || a.name.localeCompare(b.name, "tr"),
