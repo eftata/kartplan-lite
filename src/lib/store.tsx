@@ -2,6 +2,7 @@ import { type User, onAuthStateChanged } from "firebase/auth";
 import { type ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { fb } from "../firebase";
 import { isAdmin, watchCampaigns, watchCards, watchUser } from "./data";
+import { SEED_CARDS } from "./seed";
 import { turkeyToday } from "./dates";
 import type { Campaign, CatalogCard, UserDoc } from "./types";
 
@@ -25,7 +26,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserDoc | null | undefined>(undefined);
   const [admin, setAdmin] = useState(false);
-  const [catalog, setCatalog] = useState<CatalogCard[]>([]);
+  const [catalog, setCatalog] = useState<CatalogCard[]>(SEED_CARDS);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [error, setError] = useState<string | null>(null);
   const today = turkeyToday();
