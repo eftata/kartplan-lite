@@ -1,5 +1,6 @@
 import { type JSX, useEffect } from "react";
 import { Layout } from "./components/Layout";
+import { Brand } from "./components/Brand";
 import { CONSENT_VERSION } from "./lib/data";
 import { navigate, usePath } from "./lib/router";
 import { useApp } from "./lib/store";
@@ -65,7 +66,7 @@ function Splash() {
   return (
     <div className="splash" aria-busy="true">
       <span className="wordmark">
-        Kart<em>Plan</em>
+        <Brand />
       </span>
     </div>
   );
