@@ -1,5 +1,6 @@
 import { signOut } from "firebase/auth";
 import { useState } from "react";
+import { Brand } from "../components/Brand";
 import { CardPicker } from "../components/CardPicker";
 import { SpendForm } from "../components/SpendForm";
 import { fb } from "../firebase";
@@ -42,7 +43,7 @@ export function Onboarding() {
     <div className="onboard">
       <header className="topbar topbar-plain">
         <span className="wordmark">
-          Kart<em>Plan</em>
+          <Brand />
         </span>
         <button type="button" className="btn btn-ghost" onClick={() => signOut(fb().auth)}>
           Çıkış
