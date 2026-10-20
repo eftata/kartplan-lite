@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ProgramIcon } from "../components/ProgramIcon";
 import { Brand } from "../components/Brand";
+import { CampaignCard } from "../components/CampaignCard";
+import { SectorIcon } from "../components/SectorIcon";
 import { EXTERNAL_CAMPAIGNS, type ExternalCampaign } from "../lib/externalCampaigns";
 import { Link } from "../lib/router";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
@@ -179,6 +181,30 @@ export function Explore() {
                 : "Doğrulanan seçki"}
             </span>
           </div>
+          <div className="discovery-sectors" aria-label="Sektör filtresi">
+            {categories.map((item) => (
+              <button
+                key={item}
+                className={category === item ? "active" : ""}
+                aria-pressed={category === item}
+                onClick={() => {
+                  setCategory(item);
+                  setPage(1);
+                }}
+              >
+                <SectorIcon category={item} />
+                <span>
+                  <strong>{item === "Tümü" ? "Tüm sektörler" : item}</strong>
+                  <small>
+                    {item === "Tümü"
+                      ? current.length
+                      : current.filter((c) => c.category === item).length}{" "}
+                    kampanya
+                  </small>
+                </span>
+              </button>
+            ))}
+          </div>
           <div className="discovery-programs" aria-label="Kart programı filtresi">
             <button
               className={!program ? "active" : ""}
@@ -198,6 +224,7 @@ export function Explore() {
                   setPage(1);
                 }}
               >
+                <ProgramIcon program={source.program} size={22} />
                 {source.name}
               </button>
             ))}
@@ -271,61 +298,9 @@ export function Explore() {
           </div>
           {visible.length ? (
             <div className="discovery-grid">
-              {visible.slice(0, page * 24).map((campaign) => {
-                const source = CAMPAIGN_SOURCES.find((item) => item.program === campaign.program);
-                return (
-                  <article className={`offer-card offer-${campaign.program}`} key={campaign.id}>
-                    <div className="offer-meta">
-                      <span className="offer-bank-mark">
-                        <ProgramIcon program={campaign.program} size={34} />
-                      </span>
-                      <span className="offer-source">
-                        <strong>{source?.name ?? campaign.program}</strong>
-                        <small>{source?.bank ?? "KartPlan"}</small>
-                      </span>
-                      <span className="offer-category">{campaign.category}</span>
-                    </div>
-                    <div className="offer-content">
-                      {campaign.benefit && (
-                        <span className="offer-benefit">{campaign.benefit}</span>
-                      )}
-                      <h3>{campaign.title}</h3>
-                      {campaign.summary && <p>{campaign.summary}</p>}
-                    </div>
-                    <div className="offer-facts">
-                      <div>
-                        <small>SEKTÖR</small>
-                        <strong>{campaign.category}</strong>
-                      </div>
-                      <div>
-                        <small>GEÇERLİLİK</small>
-                        <strong>
-                          {campaign.endsAt
-                            ? new Date(`${campaign.endsAt}T12:00:00`).toLocaleDateString("tr-TR", {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              })
-                            : "Bankada teyit et"}
-                        </strong>
-                      </div>
-                    </div>
-                    <div className="offer-footer">
-                      <span>Resmi banka kaynağı</span>
-                      {campaign.sourceUrl && (
-                        <a
-                          href={campaign.sourceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${campaign.title} koşullarını bankada teyit et`}
-                        >
-                          Bankada teyit et ↗
-                        </a>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+              {visible.slice(0, page * 24).map((campaign) => (
+                <CampaignCard key={campaign.id} campaign={campaign} today={today} />
+              ))}
             </div>
           ) : (
             <div className="discovery-empty">
