@@ -1,3 +1,8 @@
+import { useState } from "react";
+import { useCampaignFeed } from "../lib/useCampaignFeed";
+import { planOpportunities } from "../lib/planOpportunities";
+import { planWithReservations, type PlanReservation } from "../lib/planReservations";
+import { PlanOpportunities } from "../components/PlanOpportunities";
 import { PageHead } from "../components/Layout";
 import { CardLabel } from "../components/MiniCard";
 import { rewardText } from "../components/CampaignItem";
@@ -12,6 +17,8 @@ import type { CategorySlug } from "../lib/types";
 
 export function Plan() {
   const { user, profile, myCards, planCampaigns: campaigns, today, catalog } = useSession();
+  const { external, loading } = useCampaignFeed(today);
+  const [reservations, setReservations] = useState<PlanReservation[]>([]);
   const applicable = campaigns.filter(
     (c) => !c.demo && isActiveThisMonth(c, today) && eligibleCards(c, myCards).length > 0,
   );
@@ -25,7 +32,21 @@ export function Plan() {
     joined: profile.joined,
     today,
   };
-  const plan = optimize(input);
+  const baseline = optimize(input);
+  const { plan, issues, accepted } = planWithReservations(input, reservations);
+  const opportunities = planOpportunities(
+    external,
+    campaigns,
+    myCards,
+    profile.spend,
+    today,
+    new Set(plan.outcomes.map((o) => o.campaign.id)),
+  );
+  const reserve = (reservation: PlanReservation) =>
+    setReservations((old) => [
+      ...old.filter((r) => r.campaignId !== reservation.campaignId),
+      reservation,
+    ]);
   const single = bestSingleCard(input);
   const cardById = (id: string) => catalog.find((c) => c.id === id);
 
@@ -34,7 +55,8 @@ export function Plan() {
   const byCategory = [...groups.entries()];
 
   const toJoin = plan.outcomes.filter((o) => o.campaign.requiresJoin && !o.joined);
-  const extra = single ? plan.totalKurus - single.totalKurus : 0;
+  const comparison = accepted.length ? baseline.totalKurus : (single?.totalKurus ?? 0);
+  const extra = plan.totalKurus - comparison;
   const unverified = myCards.some((c) => !c.verified);
 
   if (myCards.length === 0) {
@@ -66,8 +88,14 @@ export function Plan() {
           <b>{Object.values(profile.spend).filter((v) => v && v > 0).length}</b> harcama kategorisi
         </span>
         <span>
-          <b>{applicable.length}</b> hesaplanabilir kampanya
+          <b>{applicable.filter((c) => !c.scenarioOnly).length}</b> otomatik hesaplama kuralı
         </span>
+        <span>
+          <b>{applicable.filter((c) => c.scenarioOnly).length}</b> koşula bağlı hesaplama
+        </span>
+        <a href="#plan-firsatlari">
+          {loading ? "Fırsatlar yükleniyor…" : `${opportunities.length} güncel fırsatı incele ↓`}
+        </a>
         <Link href="/kartlarim">Kartları düzenle ↗</Link>
         <Link href="/harcama">Harcamaları düzenle ↗</Link>
       </div>
@@ -78,9 +106,24 @@ export function Plan() {
           <Link href="/harcama">Harcama ekle ↗</Link>
         </div>
       )}
+      {issues.length > 0 && (
+        <div className="callout" role="alert">
+          <h2>Bu bütçe payları uygulanamadı</h2>
+          <ul>
+            {issues.map((issue, i) => (
+              <li key={i}>{issue}</li>
+            ))}
+          </ul>
+          <button type="button" className="btn btn-ghost" onClick={() => setReservations(accepted)}>
+            Uygulanamayan seçimleri temizle
+          </button>
+        </div>
+      )}
       <section className="summary">
         <div className="summary-main">
-          <span className="kicker">Koşullu net kazanç tahmini</span>
+          <span className="kicker">
+            {accepted.length ? "Seçtiğin senaryonun net kazancı" : "Otomatik planın net kazancı"}
+          </span>
           <strong className="big num">{formatKurus(plan.totalKurus)}</strong>
           <span className="muted small">
             Kampanyalardan {formatKurus(plan.campaignKurus)} · temel puandan{" "}
@@ -88,10 +131,12 @@ export function Plan() {
           </span>
         </div>
         <div className="summary-side">
-          <span className="kicker">En iyi tek kart senaryosu</span>
-          <strong className="num">{formatKurus(single?.totalKurus ?? 0)}</strong>
+          <span className="kicker">
+            {accepted.length ? "Mağaza seçmeden otomatik plan" : "En iyi tek kart senaryosu"}
+          </span>
+          <strong className="num">{formatKurus(comparison)}</strong>
           <span className="muted small">
-            {single && cardById(single.cardId)?.name}
+            {!accepted.length && single && cardById(single.cardId)?.name}
             {extra > 0 && (
               <>
                 {" "}
@@ -246,6 +291,14 @@ export function Plan() {
         </section>
       )}
 
+      <PlanOpportunities
+        opportunities={opportunities}
+        today={today}
+        loading={loading}
+        reservations={accepted}
+        onReserve={reserve}
+        onRemove={(id) => setReservations((old) => old.filter((r) => r.campaignId !== id))}
+      />
       {plan.outcomes.length === 0 && (
         <p className="muted note">
           Kayıtlı tutarlarla hesaplanabilen bir kampanya kazancı bulunamadı. İşlem eşiği, kart

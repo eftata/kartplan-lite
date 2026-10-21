@@ -3431,3 +3431,66 @@ button.admin-row:hover {
   margin: 8px 0 16px;
   align-self: flex-start;
 }
+
+.plan-opportunities {
+  margin-top: 48px;
+}
+.plan-opportunity-list {
+  display: grid;
+  gap: 24px;
+  margin: 20px 0;
+}
+.plan-opportunity {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.plan-opportunity > .campaign-card {
+  border: 0;
+  border-radius: 0;
+}
+.opportunity-reason {
+  padding: 18px 22px;
+  background: #f1f5fb;
+  border-bottom: 1px solid var(--line);
+}
+.opportunity-reason p {
+  font-size: 13px;
+  margin: 6px 0;
+}
+.opportunity-reason small {
+  color: var(--muted);
+}
+.opportunity-planned {
+  background: #edf8f0;
+}
+.scenario-editor {
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.scenario-editor label {
+  display: grid;
+  gap: 6px;
+}
+.scenario-editor .scenario-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.scenario-editor .input {
+  max-width: 420px;
+}
+@media (max-width: 600px) {
+  .opportunity-reason,
+  .scenario-editor {
+    padding: 14px;
+  }
+  .scenario-editor .btn {
+    width: 100%;
+    margin-top: 6px;
+  }
+}

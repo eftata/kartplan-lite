@@ -44,8 +44,8 @@ export type Plan = {
 };
 
 export function eligibleCards(c: Campaign, cards: CatalogCard[]): CatalogCard[] {
-  return cards.filter(
-    (k) => k.program === c.program && (c.cardIds.length === 0 || c.cardIds.includes(k.id)),
+  return cards.filter((k) =>
+    c.cardIds.length > 0 ? c.cardIds.includes(k.id) : k.program === c.program,
   );
 }
 
@@ -122,7 +122,7 @@ function optimizeGreedy(input: PlanInput): Plan {
   };
 
   const campaigns = input.campaigns
-    .filter((c) => isActiveThisMonth(c, today))
+    .filter((c) => !c.scenarioOnly && isActiveThisMonth(c, today))
     .sort((a, b) => a.id.localeCompare(b.id));
 
   // Her kampanya için uygun kartlardan temel oranı en yüksek olanı.
@@ -259,6 +259,132 @@ function optimizeGreedy(input: PlanInput): Plan {
   };
 }
 
+/** Search reward thresholds for fixed/repeated sector offers instead of committing to one greedy pick. */
+function optimizeThresholds(input: PlanInput, fallback: Plan): Plan {
+  const campaigns = input.campaigns.filter(
+    (c) => !c.scenarioOnly && isActiveThisMonth(c, input.today),
+  );
+  // Cross-sector and continuous percentage rules continue through the original allocator.
+  if (campaigns.some((c) => c.category === "tumu" || c.rewardKind === "oran")) return fallback;
+  const bestBase = Math.max(0, ...input.cards.map(baseRate));
+  const lines: PlanLine[] = [];
+  for (const [category, budgetValue] of Object.entries(input.spend)) {
+    const cat = category as CategorySlug;
+    const budget = budgetValue ?? 0;
+    if (budget <= 0) continue;
+    const relevant = campaigns.filter((c) => c.category === cat);
+    // Cards sharing any campaign belong to one customer reward pool, avoiding duplicate caps.
+    const components = input.cards.map((card) => [card]);
+    for (const campaign of relevant) {
+      const eligible = new Set(eligibleCards(campaign, input.cards).map((c) => c.id));
+      const matching = components.filter((group) => group.some((card) => eligible.has(card.id)));
+      if (matching.length > 1) {
+        const merged = matching.flat();
+        for (const group of matching) components.splice(components.indexOf(group), 1);
+        components.push(merged);
+      }
+    }
+    type State = { spent: number; gain: number; lines: PlanLine[] };
+    let states: State[] = [{ spent: 0, gain: 0, lines: [] }];
+    for (const group of components) {
+      const choices: State[] = [{ spent: 0, gain: 0, lines: [] }];
+      for (const card of group) {
+        const offers = relevant.filter((c) => eligibleCards(c, [card]).length > 0);
+        const thresholds = new Set<number>();
+        for (const c of offers) {
+          if (c.repeatReward && c.rewardKurus > 0 && c.minSpendKurus > 0) {
+            const steps = Math.min(1000, Math.ceil(c.capKurus / c.rewardKurus));
+            for (let i = 1; i <= steps; i++)
+              thresholds.add((i + (c.skipTransactions ?? 0)) * c.minSpendKurus);
+          } else thresholds.add(Math.max(1, c.minSpendKurus));
+        }
+        for (const spent of thresholds) {
+          if (spent > budget) continue;
+          const rewards = new Map<string, number>();
+          for (const c of offers) {
+            const key = c.calculationGroup || c.id;
+            rewards.set(key, Math.max(rewards.get(key) ?? 0, netCampaignReward(c, spent, card)));
+          }
+          const gain =
+            [...rewards.values()].reduce((a, b) => a + b, 0) -
+            applyBps(spent, bestBase - baseRate(card));
+          if (gain > 0)
+            choices.push({
+              spent,
+              gain,
+              lines: [{ category: cat, cardId: card.id, amountKurus: spent }],
+            });
+        }
+      }
+      const next = new Map<number, State>();
+      for (const state of states)
+        for (const choice of choices) {
+          const spent = state.spent + choice.spent;
+          if (spent > budget) continue;
+          const gain = state.gain + choice.gain;
+          if (!next.has(spent) || next.get(spent)!.gain < gain)
+            next.set(spent, { spent, gain, lines: [...state.lines, ...choice.lines] });
+        }
+      let highest = -Infinity;
+      states = [...next.values()]
+        .sort((a, b) => a.spent - b.spent)
+        .filter((state) => {
+          if (state.gain <= highest) return false;
+          highest = state.gain;
+          return true;
+        });
+    }
+    const chosen = states.reduce(
+      (best, state) => (state.gain > best.gain ? state : best),
+      states[0]!,
+    );
+    lines.push(...chosen.lines);
+    const rest = budget - chosen.spent;
+    const baseCard = [...input.cards].sort((a, b) => baseRate(b) - baseRate(a))[0];
+    if (rest > 0 && baseCard) {
+      const line = lines.find((l) => l.category === cat && l.cardId === baseCard.id);
+      if (line) line.amountKurus += rest;
+      else lines.push({ category: cat, cardId: baseCard.id, amountKurus: rest });
+    }
+  }
+  const outcomes: CampaignOutcome[] = [];
+  for (const c of campaigns) {
+    let best: CampaignOutcome | undefined;
+    for (const card of eligibleCards(c, input.cards)) {
+      const spent = lines
+        .filter((l) => l.cardId === card.id && matchesCategory(c, l.category))
+        .reduce((s, l) => s + l.amountKurus, 0);
+      const reward = netCampaignReward(c, spent, card);
+      if (reward > 0 && (!best || reward > best.rewardKurus))
+        best = {
+          campaign: c,
+          cardId: card.id,
+          spentKurus: spent,
+          rewardKurus: reward,
+          grossRewardKurus: campaignReward(c, spent),
+          feeKurus: campaignFee(c, card),
+          joined: !!input.joined[c.id],
+        };
+    }
+    if (best) outcomes.push(best);
+  }
+  const grouped = new Map<string, CampaignOutcome>();
+  for (const o of outcomes) {
+    const key = o.campaign.calculationGroup || o.campaign.id;
+    if (!grouped.has(key) || grouped.get(key)!.rewardKurus < o.rewardKurus) grouped.set(key, o);
+  }
+  const selected = [...grouped.values()];
+  const baseKurus = lines.reduce(
+    (s, l) => s + applyBps(l.amountKurus, baseRate(input.cards.find((c) => c.id === l.cardId)!)),
+    0,
+  );
+  const campaignKurus = selected.reduce((s, o) => s + o.rewardKurus, 0);
+  const totalKurus = baseKurus + campaignKurus;
+  return totalKurus > fallback.totalKurus
+    ? { ...fallback, lines, outcomes: selected, baseKurus, campaignKurus, totalKurus }
+    : fallback;
+}
+
 /** Keep the best single-card allocation as a lower bound for the greedy multi-card plan. */
 export function optimize(input: PlanInput): Plan {
   let best = optimizeGreedy(input);
@@ -267,7 +393,7 @@ export function optimize(input: PlanInput): Plan {
       const single = optimizeGreedy({ ...input, cards: [card] });
       if (single.totalKurus > best.totalKurus) best = single;
     }
-  return best;
+  return optimizeThresholds(input, best);
 }
 
 /** "Her şeyi tek kartla ödeseydin": en iyi tek kartın kazancı. */

@@ -3,7 +3,15 @@ import type { ExternalCampaign } from "../lib/externalCampaigns";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
 import { BankLogo, ProgramIcon } from "./ProgramIcon";
 
-export function CampaignCard({ campaign, today }: { campaign: ExternalCampaign; today: string }) {
+export function CampaignCard({
+  campaign,
+  today,
+  showApplication = true,
+}: {
+  campaign: ExternalCampaign;
+  today: string;
+  showApplication?: boolean;
+}) {
   const source = CAMPAIGN_SOURCES.find((item) => item.program === campaign.program);
   const [imageFailed, setImageFailed] = useState(false);
   const headingId = useId();
@@ -107,7 +115,7 @@ export function CampaignCard({ campaign, today }: { campaign: ExternalCampaign; 
           </p>
         </div>
       </div>
-      {source && (
+      {source && showApplication && (
         <div className="campaign-application">
           <div>
             <strong>{source.name} kartın yok mu?</strong>

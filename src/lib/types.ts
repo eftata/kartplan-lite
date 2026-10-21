@@ -38,6 +38,8 @@ export type Campaign = {
   participationFeeKurus?: number;
   calculationGroup?: string;
   planningOnly?: boolean;
+  scenarioOnly?: boolean;
+  scenarioHint?: string;
   reviewedAt?: string;
   /** sabit: eşiğe ulaşınca kazanılan tutar. */
   rewardKurus: number;

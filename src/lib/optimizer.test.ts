@@ -209,3 +209,24 @@ describe("advise", () => {
     expect(res2[0]?.campaigns[0]?.needsJoin).toBe(true);
   });
 });
+
+describe("reward threshold allocation", () => {
+  it("finds two smaller campaigns when the greedy ratio consumes their shared budget", () => {
+    const cards = [card("a", "a"), card("b", "b"), card("c", "c")];
+    const campaigns = [
+      camp("large", { program: "a", minSpendKurus: 600_000, rewardKurus: 100_000 }),
+      camp("small-b", { program: "b", minSpendKurus: 500_000, rewardKurus: 80_000 }),
+      camp("small-c", { program: "c", minSpendKurus: 500_000, rewardKurus: 80_000 }),
+    ];
+    const plan = optimize({
+      cards,
+      campaigns,
+      spend: { market: 1_000_000 },
+      joined: {},
+      today: TODAY,
+    });
+    expect(plan.totalKurus).toBe(160_000);
+    expect(plan.lines.reduce((s, l) => s + l.amountKurus, 0)).toBe(1_000_000);
+    expect(plan.outcomes.map((o) => o.campaign.id).sort()).toEqual(["small-b", "small-c"]);
+  });
+});
