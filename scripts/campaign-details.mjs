@@ -39,7 +39,7 @@ export function endDate(text) {
     : "";
 }
 export function campaignFacts(lines = []) {
-  const sentences = lines.flatMap((line) => line.split(/(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ])/));
+  const sentences = lines.flatMap((line) => line.split(/(?<=[.!?])\s*(?=[A-ZÇĞİÖŞÜ])/));
   const candidates = sentences.filter(
     (line) =>
       /katıl|kayıt|katılım/i.test(line) &&
@@ -69,11 +69,12 @@ export function extractDetails(html, campaign) {
   const $ = load(html);
   const content = $(selectors[campaign.program]);
   content.find("script,style,nav").remove();
-  const lines = [
+  content.find("br").replaceWith("\n");
+  let lines = [
     ...new Set(
       content
-        .find("p,li")
-        .filter((_, el) => !$(el).find("p,li").length)
+        .find("p,li,div")
+        .filter((_, el) => !$(el).find("p,li,div").length)
         .map((_, el) => clean($(el).text()))
         .get(),
     ),
@@ -83,6 +84,24 @@ export function extractDetails(html, campaign) {
       line.length <= 1300 &&
       !/çerez|cookie|kişisel veriler|tüm hakları/i.test(line),
   );
+  if (!lines.length) {
+    lines = [
+      ...new Set(
+        content
+          .text()
+          .split(/\n+/)
+          .map(clean)
+          .flatMap((line) =>
+            line.length > 1300 ? line.split(/(?<=[.!?])\s+/).map(clean) : [line],
+          ),
+      ),
+    ].filter(
+      (line) =>
+        line.length >= 20 &&
+        line.length <= 1300 &&
+        !/çerez|cookie|kişisel veriler|tüm hakları/i.test(line),
+    );
+  }
   if (campaign.program === "bonus") {
     const right = $(".campaign-detail__info--right").clone();
     right.find(".campaign-detail__online-shopping").remove();
@@ -93,7 +112,7 @@ export function extractDetails(html, campaign) {
   }
   if (!lines.length) return {};
   const { participation, spendCondition: spending } = campaignFacts(lines);
-  const sentences = lines.flatMap((line) => line.split(/(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ])/));
+  const sentences = lines.flatMap((line) => line.split(/(?<=[.!?])\s*(?=[A-ZÇĞİÖŞÜ])/));
   const eligibility =
     sentences.find(
       (line) =>
@@ -107,7 +126,9 @@ export function extractDetails(html, campaign) {
     lines.find(
       (line) =>
         /bonus|puan|parafpara|chip|indirim|taksit|hediye|bilet|çekiliş/i.test(line) &&
-        !/dahil değildir|saklı tutar|iptal|geri alın|sms.*ücret|katılmak için/i.test(line),
+        !/dahil değildir|saklı tutar|iptal|geri alın|sms.*ücret|katılmak için|ilk harcamadan|kampanyaya katıl|katılım için/i.test(
+          line,
+        ),
     ) ||
     lines[0];
   const dateText =
@@ -146,7 +167,7 @@ export function extractDetails(html, campaign) {
     imageUrl: image,
     endsAt: campaign.endsAt || endDate(clean(dateText)),
     checkedAt: new Date().toISOString(),
-    detailsVersion: 2,
+    detailsVersion: 3,
   };
 }
 
@@ -162,7 +183,9 @@ export async function enrichCampaigns(campaigns, previous = []) {
       const campaign = campaigns[index],
         cached = old.get(campaign.id);
       if (
-        cached?.detailsVersion === 2 &&
+        !process.argv.includes("--refresh-details") &&
+        cached?.detailsVersion === 3 &&
+        !(campaign.program === "maximum" && (cached.conditions?.length ?? 0) < 4) &&
         cached?.checkedAt &&
         Date.now() - Date.parse(cached.checkedAt) < 20 * 3600000
       ) {

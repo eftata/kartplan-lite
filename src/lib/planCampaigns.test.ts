@@ -9,7 +9,9 @@ const rule = (id: string) => PLAN_CAMPAIGNS.find((c) => c.id === id)!;
 
 describe("official campaign planning integration", () => {
   it("calculates rewards with an empty managed collection and deducts the young card entry fee", () => {
-    const campaigns = mergePlanCampaigns([]);
+    const campaigns = mergePlanCampaigns([]).filter(
+      (c) => !["35aa5cbf680a8f6a", "1bf42a025092a1c8", "d784e63c165a1c2d"].includes(c.id),
+    );
     const plan = optimize({
       cards: [findCard("axess"), findCard("bonus-genc")],
       spend: { market: 600_000, giyim: 100_000 },
@@ -23,6 +25,19 @@ describe("official campaign planning integration", () => {
     expect(plan.totalKurus).toBe(20_001);
     expect(plan.lines.reduce((s, l) => s + l.amountKurus, 0)).toBe(700_000);
     expect(outcome.joined).toBe(false);
+  });
+  it("uses the fee-free young card rules and does not stack overlapping market offers", () => {
+    const plan = optimize({
+      cards: [findCard("bonus-genc"), findCard("axess")],
+      spend: { market: 600_000, restoran: 150_000, giyim: 100_000 },
+      campaigns: mergePlanCampaigns([]),
+      today,
+      joined: {},
+    });
+    expect(plan.totalKurus).toBe(74_000);
+    expect(plan.outcomes.filter((o) => o.campaign.category === "market")).toHaveLength(1);
+    expect(plan.outcomes.every((o) => o.feeKurus === 0)).toBe(true);
+    expect(eligibleCards(rule("35aa5cbf680a8f6a"), [findCard("bonus-card")])).toEqual([]);
   });
   it("respects first unpaid transaction, repeat thresholds and caps", () => {
     const axess = rule("46550a6409a56052");

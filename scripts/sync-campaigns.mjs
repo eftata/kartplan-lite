@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { load } from "cheerio";
+import { campaignCategory as category } from "./campaign-category.mjs";
 import { campaignFacts, enrichCampaigns } from "./campaign-details.mjs";
 
 const sources = {
@@ -10,7 +11,7 @@ const sources = {
   axess: "https://www.axess.com.tr/axess/kampanyalar",
   paraf: "https://www.paraf.com.tr/tr/kampanyalar.html",
 };
-const today = new Date().toISOString().slice(0, 10);
+
 const clean = (value) =>
   String(value ?? "")
     .replace(/\s+/g, " ")
@@ -27,26 +28,6 @@ async function get(url, json = false) {
   });
   if (!response.ok) throw new Error(`${response.status} ${url}`);
   return json ? response.json() : response.text();
-}
-
-function category(text) {
-  const s = text.toLocaleLowerCase("tr");
-  for (const [name, pattern] of [
-    ["Market", /market|gıda|migros|carrefour|a101|şok|bakkal/],
-    ["Akaryakıt", /akaryakıt|benzin|motorin|otogaz|petrol|shell|opet/],
-    ["E-ticaret", /e-ticaret|internet alışveriş|online alışveriş|trendyol|hepsiburada|amazon|n11/],
-    ["Restoran", /restoran|yemek|kahve|kafe|coffy/],
-    ["Giyim", /giyim|ayakkabı|çanta|moda|tekstil|kozmetik/],
-    ["Seyahat", /seyahat|otel|uçak|tatil|araç kiralama|turizm/],
-    ["Elektronik", /elektronik|telefon|bilgisayar|teknoloji|beyaz eşya/],
-    ["Eğitim", /eğitim|okul|kırtasiye|üniversite/],
-    ["Fatura", /fatura|otomatik ödeme|vergi|mtv|harç/],
-    ["Sağlık", /sağlık|hastane|eczane|sigorta/],
-    ["Ev & Yaşam", /mobilya|ev dekorasyon|yapı market/],
-    ["Eğlence", /sinema|oyun|konser|kültür|eğlence/],
-  ])
-    if (pattern.test(s)) return name;
-  return "Diğer";
 }
 
 function item(program, url, title, extra = {}) {
@@ -87,7 +68,7 @@ async function bonus() {
         box.find("a.direct").attr("href"),
         box.find("h2.campaign-box__title").text(),
         {
-          category: category(`${box.attr("data-sector")} ${box.find("h2").text()}`),
+          category: category(box.find("h2.campaign-box__title").text()),
         },
       );
     })
@@ -99,8 +80,11 @@ async function maximum() {
   return $(".camp_cardsAll [campid]")
     .map((_, el) => {
       const card = $(el);
-      const anchor = card.find('a[href^="/kampanyalar/"]').first();
-      const title = card.find("img[alt]").first().attr("alt") || card.find("h3").first().text();
+      const headingLink = card.find("h3").first().closest("a");
+      const anchor = headingLink.length
+        ? headingLink
+        : card.find('a[href^="/kampanyalar/"]').first();
+      const title = card.find("h3").first().text() || card.find("img[alt]").first().attr("alt");
       return item("maximum", anchor.attr("href"), title);
     })
     .get();
@@ -118,39 +102,6 @@ async function world() {
     if (!response.ok) throw new Error(`World ${response.status}`);
     const data = await response.json();
     for (const offer of data.Items ?? []) {
-      const slug = new URL(offer.Url || sources.world).pathname.split("/").pop() || "";
-      const titleWords = clean(offer.PageTitle || offer.Title)
-        .toLocaleLowerCase("tr")
-        .replace(/ı/g, "i")
-        .replace(/ş/g, "s")
-        .replace(/ğ/g, "g")
-        .replace(/ç/g, "c")
-        .replace(/ö/g, "o")
-        .replace(/ü/g, "u")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, " ")
-        .split(" ")
-        .filter(
-          (word) =>
-            word.length >= 5 &&
-            ![
-              "worldpuan",
-              "worldun",
-              "kampanya",
-              "alisveris",
-              "firsati",
-              "ozel",
-              "taksit",
-              "kartin",
-              "kredi",
-              "hediye",
-              "varan",
-            ].includes(word),
-        );
-      // Kaynak API nadiren başlığı başka bir kampanyanın URL'siyle eşleştiriyor.
-      if (titleWords.length && !titleWords.some((word) => slug.includes(word.slice(0, 5))))
-        continue;
       const entry = item("world", offer.Url, offer.PageTitle || offer.Title, {
         summary: offer.SpotTitle && offer.SpotTitle !== offer.PageTitle ? offer.SpotTitle : "",
         endsAt: String(offer.EndDate ?? "").slice(0, 10),
@@ -181,14 +132,30 @@ async function paraf() {
   const url =
     "https://www.paraf.com.tr/content/parafcard/tr/kampanyalar/_jcr_content/root/responsivegrid/filter.filtercampaigns.all.json";
   const data = await get(url, true);
-  return data
-    .map((offer) =>
-      item("paraf", offer.url, offer.title, {
-        summary: offer.teaserDescription || offer.description || "",
-        category: category(`${offer.url} ${offer.title}`),
-      }),
-    )
-    .filter(Boolean);
+  // Also listed in the rendered official bank page, but absent from its all.json response.
+  const supplements = [
+    item(
+      "paraf",
+      "https://www.paraf.com.tr/tr/kampanyalar/e-ticaret/hepsiburadada-pesin-fiyatina-6-aya-varan-taksit2.html",
+      "Hepsiburada’da peşin fiyatına 6 aya varan taksit",
+    ),
+  ];
+  const $ = load(await get(sources.paraf));
+  const listed = $('h2 a[href*="/kampanyalar/"]')
+    .map((_, el) => item("paraf", $(el).attr("href"), $(el).text()))
+    .get();
+  return [
+    ...supplements,
+    ...listed,
+    ...data
+      .map((offer) =>
+        item("paraf", offer.url, offer.title, {
+          summary: offer.teaserDescription || offer.description || "",
+          category: category(`${offer.url} ${offer.title}`),
+        }),
+      )
+      .filter(Boolean),
+  ];
 }
 
 const all = [];
@@ -216,9 +183,11 @@ const enriched = await enrichCampaigns(all, previous);
 const feed = {
   updatedAt: new Date().toISOString(),
   counts,
-  campaigns: enriched.map((campaign) =>
-    campaign.conditions ? { ...campaign, ...campaignFacts(campaign.conditions) } : campaign,
-  ),
+  campaigns: enriched.map((campaign) => ({
+    ...campaign,
+    category: category(campaign.title),
+    ...(campaign.conditions ? campaignFacts(campaign.conditions) : {}),
+  })),
 };
 await writeFile(
   new URL("../public/campaign-feed.json", import.meta.url),

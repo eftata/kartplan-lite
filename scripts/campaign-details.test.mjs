@@ -37,3 +37,29 @@ describe("official campaign detail extraction", () => {
     expect(endDate("Bonuslar 5 Kasım 2026 tarihinde yüklenecek")).toBe("");
   });
 });
+
+describe("campaign sector classification", () => {
+  it("separates food markets from home improvement, clothing and car rental", async () => {
+    const { campaignCategory } = await import("./campaign-category.mjs");
+    expect(campaignCategory("Yapı market ve ısıtma-soğutmada 1.500 TL bonus!")).toBe("Ev & Yaşam");
+    expect(
+      campaignCategory("Giyim, ayakkabı ve çanta alışverişlerinize toplam 1.500 TL bonus!"),
+    ).toBe("Giyim");
+    expect(
+      campaignCategory("Enterprise'da Hyundai Bayon benzinli otomatik 1.890 TL'den kiralama!"),
+    ).toBe("Seyahat");
+    expect(campaignCategory("Bonus Genç'le market alışverişlerine 400 TL bonus!")).toBe("Market");
+  });
+});
+
+describe("Maximum rich text details", () => {
+  it("reads div paragraphs when the source uses empty p elements", () => {
+    const result = extractDetails(
+      `<h1>Shell istasyonlarında MaxiPuan</h1><div class="campaign-detail-desc"><p>​</p><div>Farklı günlerde 1.500 TL ve üzeri dördüncü akaryakıt alışverişine 450 TL MaxiPuan verilecektir.</div><div>İşCep kampanyalar bölümünden KATIL butonuna tıklayarak katılım sağlanması gerekmektedir.</div></div>`,
+      { ...campaign, program: "maximum" },
+    );
+    expect(result.conditions).toHaveLength(2);
+    expect(result.summary).toContain("450 TL");
+    expect(result.participation).toContain("İşCep");
+  });
+});

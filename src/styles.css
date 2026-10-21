@@ -458,6 +458,7 @@ input[type="range"] {
   cursor: pointer;
 }
 
+.segmented button[aria-pressed="true"],
 .segmented button[aria-selected="true"],
 .segmented button[aria-checked="true"] {
   background: var(--surface);
@@ -3413,4 +3414,20 @@ button.admin-row:hover {
   max-width: 70ch;
   line-height: 1.6;
   margin-top: 5px;
+}
+
+.member-campaign-grid {
+  margin: 24px 0;
+}
+.member-campaign {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.member-campaign > .campaign-card {
+  flex: 1;
+}
+.member-campaign > .btn {
+  margin: 8px 0 16px;
+  align-self: flex-start;
 }

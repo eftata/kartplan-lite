@@ -1,177 +1,196 @@
+import { mixCampaigns } from "../lib/campaignOrder";
+import { categoryName } from "../lib/categories";
+import { useState } from "react";
+import { CampaignCard } from "../components/CampaignCard";
 import { CampaignItem } from "../components/CampaignItem";
 import { PageHead } from "../components/Layout";
-import { BENEFIT_LABEL, CATEGORIES } from "../lib/categories";
-import { estimateForProfile, eligibleCards, optimize } from "../lib/optimizer";
-import { navigate, usePath } from "../lib/router";
-import { Link } from "../lib/router";
+import { setJoined } from "../lib/data";
+import { CAMPAIGN_SOURCES } from "../lib/sources";
 import { useSession } from "../lib/store";
-import type { Benefit } from "../lib/types";
+import { useCampaignFeed } from "../lib/useCampaignFeed";
 
 export function Campaigns() {
   const { user, profile, myCards, campaigns, today } = useSession();
-  const { search } = usePath();
-  const scope = search.get("kapsam") === "tumu" ? "tumu" : "bana";
-  const card = search.get("kart") ?? "";
-  const cat = search.get("kategori") ?? "";
-  const tur = search.get("tur") ?? "";
-  const sort = search.get("sirala") === "kazanc" ? "kazanc" : "bitis";
-
-  const set = (key: string, value: string) => {
-    const next = new URLSearchParams(search);
-    if (value) next.set(key, value);
-    else next.delete(key);
-    const qs = next.toString();
-    navigate(`/kampanyalar${qs ? `?${qs}` : ""}`, true);
-  };
-
-  const plan = optimize({
-    cards: myCards,
-    spend: profile.spend,
-    campaigns,
-    joined: profile.joined,
-    today,
-  });
-  const inPlan = new Set(plan.outcomes.map((o) => o.campaign.id));
-  const spendCats = new Set(
-    Object.entries(profile.spend)
-      .filter(([, v]) => (v ?? 0) > 0)
-      .map(([k]) => k),
+  const { external, feed, loading } = useCampaignFeed(today);
+  const [scope, setScope] = useState("tumu");
+  const [program, setProgram] = useState("");
+  const [category, setCategory] = useState("");
+  const [query, setQuery] = useState("");
+  const [joinedOnly, setJoinedOnly] = useState(false);
+  const [limit, setLimit] = useState(24);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const owned = new Set(myCards.map((c) => c.program));
+  const current = external.filter((c) => !c.endsAt || c.endsAt >= today);
+  const categories = [...new Set(current.map((c) => c.category))].sort((a, b) =>
+    a.localeCompare(b, "tr"),
   );
-
-  const rows = campaigns
-    .filter((c) => c.status === "yayinda" && c.endsAt >= today)
-    .map((c) => ({
-      c,
-      cards: eligibleCards(c, myCards),
-      est: estimateForProfile(c, profile.spend),
-    }))
-    .filter(({ c, cards }) => {
-      if (
-        scope === "bana" &&
-        (cards.length === 0 || (c.category !== "tumu" && !spendCats.has(c.category)))
-      )
-        return false;
-      if (card && !cards.some((k) => k.id === card)) return false;
-      if (cat && c.category !== cat && c.category !== "tumu") return false;
-      if (tur && c.benefit !== tur) return false;
-      return true;
-    })
-    .sort(
-      (a, b) =>
-        (sort === "kazanc" ? b.est - a.est : a.c.endsAt.localeCompare(b.c.endsAt)) ||
-        a.c.title.localeCompare(b.c.title, "tr"),
-    );
-
+  const needle = query.trim().toLocaleLowerCase("tr");
+  const rows = mixCampaigns(
+    current.filter(
+      (c) =>
+        (scope === "tumu" || owned.has(c.program)) &&
+        (!program || c.program === program) &&
+        (!category || c.category === category) &&
+        (!joinedOnly || profile.joined[c.id]) &&
+        (!needle ||
+          `${c.title} ${c.summary} ${c.category}`.toLocaleLowerCase("tr").includes(needle)),
+    ),
+  );
+  const managed = campaigns.filter(
+    (c) =>
+      !c.demo &&
+      c.status === "yayinda" &&
+      c.startsAt <= today &&
+      c.endsAt >= today &&
+      !current.some((e) => e.sourceUrl === c.url) &&
+      (scope === "tumu" || owned.has(c.program)) &&
+      (!category || c.category === "tumu" || categoryName(c.category) === category) &&
+      (!program || program === c.program) &&
+      (!needle || `${c.title} ${c.summary}`.toLocaleLowerCase("tr").includes(needle)) &&
+      (!joinedOnly || profile.joined[c.id]),
+  );
+  async function toggle(id: string) {
+    setBusy(id);
+    setError("");
+    try {
+      await setJoined(user.uid, id, !profile.joined[id]);
+    } catch {
+      setError("Katılım durumu kaydedilemedi. Tekrar dene.");
+    } finally {
+      setBusy(null);
+    }
+  }
   return (
     <>
-      <PageHead
-        kicker="Kampanyalar"
-        title={scope === "bana" ? "Sana uyan kampanyalar" : "Tüm kampanyalar"}
-      >
-        Kartlarına ve harcama alanlarına göre süzüldü. Katıldıklarını işaretle, plan buna göre
-        güncellensin.
+      <PageHead kicker="Banka kampanyaları" title="Tüm fırsatların tek yerde">
+        Keşfet ile aynı güncel banka listesi. Kampanyaları incele, sana uygun olanların katılımını
+        takip et.
       </PageHead>
-
-      <div className="segmented" role="tablist">
+      <div className="segmented" role="group" aria-label="Kampanya kapsamı">
         <button
           type="button"
-          role="tab"
-          aria-selected={scope === "bana"}
-          onClick={() => set("kapsam", "")}
+          aria-pressed={scope === "tumu"}
+          onClick={() => {
+            setScope("tumu");
+            setLimit(24);
+          }}
         >
-          Bana uygun
+          Tüm kampanyalar
         </button>
         <button
           type="button"
-          role="tab"
-          aria-selected={scope === "tumu"}
-          onClick={() => set("kapsam", "tumu")}
+          aria-pressed={scope === "bana"}
+          onClick={() => {
+            setScope("bana");
+            setLimit(24);
+          }}
         >
-          Tümü
+          Kart programlarım
         </button>
       </div>
-
       <div className="filters">
+        <input
+          className="input"
+          type="search"
+          aria-label="Kampanya ara"
+          placeholder="Marka, fırsat veya sektör ara…"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setLimit(24);
+          }}
+        />
         <select
           className="input"
-          value={card}
-          onChange={(e) => set("kart", e.target.value)}
-          aria-label="Kart"
+          aria-label="Kart programı"
+          value={program}
+          onChange={(e) => {
+            setProgram(e.target.value);
+            setLimit(24);
+          }}
         >
-          <option value="">Tüm kartlarım</option>
-          {myCards.map((k) => (
-            <option key={k.id} value={k.id}>
-              {k.name}
+          <option value="">Tüm programlar</option>
+          {CAMPAIGN_SOURCES.map((s) => (
+            <option key={s.program} value={s.program}>
+              {s.name}
             </option>
           ))}
         </select>
         <select
           className="input"
-          value={cat}
-          onChange={(e) => set("kategori", e.target.value)}
-          aria-label="Kategori"
+          aria-label="Sektör"
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setLimit(24);
+          }}
         >
-          <option value="">Tüm kategoriler</option>
-          {CATEGORIES.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.name}
-            </option>
+          <option value="">Tüm sektörler</option>
+          {categories.map((c) => (
+            <option key={c}>{c}</option>
           ))}
         </select>
-        <select
-          className="input"
-          value={tur}
-          onChange={(e) => set("tur", e.target.value)}
-          aria-label="Fayda türü"
-        >
-          <option value="">Tüm faydalar</option>
-          {(Object.keys(BENEFIT_LABEL) as Benefit[]).map((b) => (
-            <option key={b} value={b}>
-              {BENEFIT_LABEL[b]}
-            </option>
-          ))}
-        </select>
-        <select
-          className="input"
-          value={sort}
-          onChange={(e) => set("sirala", e.target.value === "kazanc" ? "kazanc" : "")}
-          aria-label="Sıralama"
-        >
-          <option value="bitis">Bitişe göre</option>
-          <option value="kazanc">Kazanca göre</option>
-        </select>
+        <label className="small">
+          <input
+            type="checkbox"
+            checked={joinedOnly}
+            onChange={(e) => {
+              setJoinedOnly(e.target.checked);
+              setLimit(24);
+            }}
+          />{" "}
+          Katıldıklarım
+        </label>
       </div>
-
-      <p className="muted small count">{rows.length} kampanya</p>
-
-      <div className="campaign-list">
-        {rows.map(({ c, cards, est }) => (
-          <CampaignItem
-            key={c.id}
-            campaign={c}
-            cards={cards}
-            uid={user.uid}
-            joined={!!profile.joined[c.id]}
-            today={today}
-            estimateKurus={cards.length ? est : undefined}
-            inPlan={inPlan.has(c.id)}
-          />
+      <p className="muted small" role="status">
+        {loading ? "Banka listesi güncelleniyor…" : `${rows.length + managed.length} kampanya`}
+        {feed &&
+          ` · ${new Date(feed.updatedAt).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })} güncellendi`}
+      </p>
+      {error && <p role="alert">{error}</p>}
+      <p className="muted small">
+        Program eşleşmesi, kartının kampanyaya kesin uygun olduğunu göstermez. Kart türü, mağaza/POS
+        ve katılım koşullarını detaylardan kontrol et. Planda yalnızca hesaplama kuralı doğrulanan
+        kampanyalar toplanır.
+      </p>
+      <div className="discovery-grid member-campaign-grid">
+        {rows.slice(0, limit).map((c) => (
+          <div key={c.id} className="member-campaign">
+            <CampaignCard campaign={c} today={today} />
+            <button
+              type="button"
+              className={`btn ${profile.joined[c.id] ? "btn-ghost" : "btn-soft"}`}
+              disabled={busy !== null}
+              aria-pressed={!!profile.joined[c.id]}
+              onClick={() => void toggle(c.id)}
+            >
+              {busy === c.id
+                ? "Kaydediliyor…"
+                : profile.joined[c.id]
+                  ? "Katıldım ✓ · geri al"
+                  : "Bankadan katıldım"}
+            </button>
+          </div>
         ))}
       </div>
-
-      {rows.length === 0 && (
-        <div className="empty">
-          <p>Bu filtrelere uyan kampanya yok.</p>
-          <p>Bankaların güncel kampanyalarını keşif sayfasından inceleyebilirsin.</p>
-          <Link href="/kesfet" className="btn btn-primary">
-            Kampanya kaynaklarına git
-          </Link>
-          {scope === "bana" && (
-            <button type="button" className="btn btn-ghost" onClick={() => set("kapsam", "tumu")}>
-              Tüm kampanyaları göster
-            </button>
-          )}
-        </div>
+      {rows.length > limit && (
+        <button type="button" className="btn btn-primary" onClick={() => setLimit((v) => v + 24)}>
+          Daha fazla kampanya göster ({rows.length - limit})
+        </button>
+      )}
+      {managed.map((c) => (
+        <CampaignItem
+          key={c.id}
+          campaign={c}
+          cards={myCards.filter((k) => k.program === c.program)}
+          uid={user.uid}
+          joined={!!profile.joined[c.id]}
+          today={today}
+        />
+      ))}
+      {!loading && !rows.length && !managed.length && (
+        <div className="empty">Bu filtrelere uyan kampanya bulunamadı.</div>
       )}
     </>
   );

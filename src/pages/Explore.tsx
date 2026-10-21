@@ -1,10 +1,11 @@
+import { useCampaignFeed } from "../lib/useCampaignFeed";
 import { CardCatalog } from "../components/CardCatalog";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ProgramIcon } from "../components/ProgramIcon";
 import { Brand } from "../components/Brand";
 import { CampaignCard } from "../components/CampaignCard";
 import { SectorIcon } from "../components/SectorIcon";
-import { EXTERNAL_CAMPAIGNS, type ExternalCampaign } from "../lib/externalCampaigns";
+import { type ExternalCampaign } from "../lib/externalCampaigns";
 import { Link } from "../lib/router";
 import { CAMPAIGN_SOURCES } from "../lib/sources";
 import { useApp } from "../lib/store";
@@ -18,33 +19,7 @@ export function Explore() {
   const [onlyMine, setOnlyMine] = useState(false);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [feed, setFeed] = useState<{ updatedAt: string; campaigns: ExternalCampaign[] } | null>(
-    null,
-  );
-  useEffect(() => {
-    let active = true;
-    async function loadFeed() {
-      const urls = [
-        `/campaign-feed.json?v=${today}`,
-        `https://raw.githubusercontent.com/eftata/kartplan-lite/main/public/campaign-feed.json?v=${today}`,
-      ];
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, { cache: "no-store" });
-          if (!response.ok) continue;
-          const data = await response.json();
-          if (active && Array.isArray(data.campaigns) && data.campaigns.length > 20)
-            setFeed((old) => (!old || data.updatedAt > old.updatedAt ? data : old));
-        } catch {
-          /* Yerel veri ve elle doğrulanan seçki kullanılabilir. */
-        }
-      }
-    }
-    void loadFeed();
-    return () => {
-      active = false;
-    };
-  }, [today]);
+  const { feed, external } = useCampaignFeed(today);
   const owned = new Set(
     catalog.filter((card) => profile?.cardIds.includes(card.id)).map((card) => card.program),
   );
@@ -67,7 +42,6 @@ export function Explore() {
       endsAt: campaign.endsAt,
       sourceUrl: campaign.url,
     }));
-  const external = feed?.campaigns ?? EXTERNAL_CAMPAIGNS;
   const current = [
     ...external.filter((campaign) => !campaign.endsAt || campaign.endsAt >= today),
     ...curated,

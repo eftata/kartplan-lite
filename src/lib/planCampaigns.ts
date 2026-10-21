@@ -4,14 +4,20 @@ import type { Campaign } from "./types";
 
 /** Explicit card eligibility for the reviewed planning rules; never infer eligibility by logo alone. */
 export const PLAN_CAMPAIGNS: Campaign[] = rules.map((rule) => {
-  const cardIds = SEED_CARDS.filter((card) => {
-    if (card.cardType === "banka" || /Business|İşletme|Üretici/i.test(card.name)) return false;
-    if (rule.program === "bonus")
-      return card.bank === "Garanti BBVA" && card.program === "bonus" && !/Flexi/i.test(card.name);
-    if (rule.program === "maximum")
-      return card.bank === "Türkiye İş Bankası" && ["maximum", "maximiles"].includes(card.program);
-    return card.program === rule.program;
-  }).map((card) => card.id);
+  const cardIds = rule.cardIds.length
+    ? rule.cardIds
+    : SEED_CARDS.filter((card) => {
+        if (card.cardType === "banka" || /Business|İşletme|Üretici/i.test(card.name)) return false;
+        if (rule.program === "bonus")
+          return (
+            card.bank === "Garanti BBVA" && card.program === "bonus" && !/Flexi/i.test(card.name)
+          );
+        if (rule.program === "maximum")
+          return (
+            card.bank === "Türkiye İş Bankası" && ["maximum", "maximiles"].includes(card.program)
+          );
+        return card.program === rule.program;
+      }).map((card) => card.id);
   return {
     ...rule,
     cardIds,
