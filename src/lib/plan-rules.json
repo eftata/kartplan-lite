@@ -74,7 +74,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "maximum-market",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "transactionMaxExclusiveKurus": 150000
   },
   {
     "id": "4727aacfa67795f7",
@@ -228,7 +229,10 @@
     "participationFeeKurus": 0,
     "calculationGroup": "paraf-akaryakit",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "transactionMinKurus": 150000,
+    "requiredTransactions": 3,
+    "separateDays": true
   },
   {
     "id": "f355b7d79868b346",
@@ -253,7 +257,10 @@
     "participationFeeKurus": 0,
     "calculationGroup": "world-akaryakit",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "transactionMinKurus": 250000,
+    "requiredTransactions": 4,
+    "separateDays": true
   },
   {
     "id": "35aa5cbf680a8f6a",
@@ -368,7 +375,10 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-akaryakit",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "transactionMinKurus": 160000,
+    "requiredTransactions": 4,
+    "separateDays": true
   },
   {
     "id": "96dc683fd2e5628c",
@@ -529,7 +539,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-restoran",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "separateDays": true
   },
   {
     "id": "f74c365c5dbabf06",

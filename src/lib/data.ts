@@ -1,3 +1,4 @@
+import { EMPTY_LEAGUE, leagueScore } from "./league";
 // Firestore erişimi tek dosyada. Koleksiyonlar:
 //   cards/{id}       katalog (herkes okur, admin yazar)
 //   campaigns/{id}   kampanyalar (yayındakini herkes, taslağı admin okur; admin yazar)
@@ -19,6 +20,9 @@ import {
   where,
   writeBatch,
   deleteField,
+  runTransaction,
+  orderBy,
+  limit,
 } from "firebase/firestore";
 import { fb } from "../firebase";
 import { SEED_CARDS, demoCampaigns } from "./seed";
@@ -104,7 +108,26 @@ export async function setJoined(uid: string, campaignId: string, joined: boolean
   });
 }
 
+export async function exportExtraData(uid: string) {
+  const [games, progress] = await Promise.all([
+    getDocs(collection(fb().db, "users", uid, "gameMonths")),
+    getDocs(collection(fb().db, "users", uid, "campaignProgress")),
+  ]);
+  return {
+    gameMonths: games.docs.map((d) => ({ id: d.id, ...d.data() })),
+    campaignProgress: progress.docs.map((d) => ({ id: d.id, ...d.data() })),
+  };
+}
 export async function deleteUserData(uid: string) {
+  const games = await getDocs(collection(fb().db, "users", uid, "gameMonths"));
+  for (const game of games.docs) {
+    const batch = writeBatch(fb().db);
+    batch.delete(game.ref);
+    batch.delete(doc(fb().db, "leaderboards", game.id, "players", uid));
+    await batch.commit();
+  }
+  const progress = await getDocs(collection(fb().db, "users", uid, "campaignProgress"));
+  for (const item of progress.docs) await deleteDoc(item.ref);
   await deleteDoc(doc(fb().db, "users", uid));
 }
 
@@ -151,4 +174,112 @@ export async function seedDemoCampaigns(today: string): Promise<number> {
     batch.set(doc(collection(fb().db, "campaigns")), { ...c, updatedAt: serverTimestamp() });
   await batch.commit();
   return list.length;
+}
+
+// ---- Monthly goals, private progress and opt-in public league ----
+export function watchProgress(
+  uid: string,
+  season: string,
+  cb: (items: import("./types").CampaignProgress[]) => void,
+  onError: (e: Error) => void,
+) {
+  return onSnapshot(
+    query(collection(fb().db, "users", uid, "campaignProgress"), where("season", "==", season)),
+    (snap) =>
+      cb(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as import("./types").CampaignProgress)),
+    onError,
+  );
+}
+export async function addProgress(
+  uid: string,
+  season: string,
+  campaign: Campaign,
+  cardId: string,
+  amountKurus: number,
+  day: string,
+) {
+  if (campaign.category === "tumu" || !Number.isSafeInteger(amountKurus) || amountKurus <= 0)
+    throw new Error("Geçersiz tutar.");
+  const ref = doc(fb().db, "users", uid, "campaignProgress", `${season}_${campaign.id}`);
+  await runTransaction(fb().db, async (tx) => {
+    const snap = await tx.get(ref);
+    const old = snap.exists() ? snap.data() : { entries: [], totalKurus: 0 };
+    tx.set(ref, {
+      season,
+      campaignId: campaign.id,
+      cardId,
+      category: campaign.category,
+      entries: [...old.entries, { amountKurus, day }],
+      totalKurus: old.totalKurus + amountKurus,
+      updatedAt: serverTimestamp(),
+    });
+  });
+}
+export function watchLeague(
+  uid: string,
+  season: string,
+  cb: (value: import("./league").LeagueMonth) => void,
+  onError: (e: Error) => void,
+) {
+  return onSnapshot(
+    doc(fb().db, "users", uid, "gameMonths", season),
+    (snap) =>
+      cb(snap.exists() ? (snap.data() as import("./league").LeagueMonth) : { ...EMPTY_LEAGUE }),
+    onError,
+  );
+}
+export function watchLeaders(
+  season: string,
+  cb: (value: import("./league").Leader[]) => void,
+  onError: (e: Error) => void,
+) {
+  return onSnapshot(
+    query(
+      collection(fb().db, "leaderboards", season, "players"),
+      orderBy("score", "desc"),
+      limit(50),
+    ),
+    (snap) =>
+      cb(snap.docs.map((d) => ({ id: d.id, nickname: d.data().nickname, score: d.data().score }))),
+    onError,
+  );
+}
+export async function updateLeague(
+  uid: string,
+  season: string,
+  action: {
+    task?: import("./league").MissionId;
+    checkin?: string;
+    optIn?: boolean;
+    nickname?: string;
+    progressId?: string;
+  },
+) {
+  const ref = doc(fb().db, "users", uid, "gameMonths", season);
+  const publicRef = doc(fb().db, "leaderboards", season, "players", uid);
+  await runTransaction(fb().db, async (tx) => {
+    const snapshot = await tx.get(ref);
+    const old = snapshot.exists()
+      ? (snapshot.data() as import("./league").LeagueMonth)
+      : { ...EMPTY_LEAGUE };
+    const tasks = { ...old.tasks, ...(action.task ? { [action.task]: true } : {}) };
+    const checkins = { ...old.checkins, ...(action.checkin ? { [action.checkin]: true } : {}) };
+    const value = {
+      tasks,
+      checkins,
+      score: leagueScore(tasks, checkins),
+      optIn: action.optIn ?? old.optIn,
+      nickname: action.nickname ?? old.nickname,
+      progressId: action.progressId ?? old.progressId,
+      updatedAt: serverTimestamp(),
+    };
+    tx.set(ref, value);
+    if (value.optIn)
+      tx.set(publicRef, {
+        nickname: value.nickname,
+        score: value.score,
+        updatedAt: serverTimestamp(),
+      });
+    else if (old.optIn) tx.delete(publicRef);
+  });
 }

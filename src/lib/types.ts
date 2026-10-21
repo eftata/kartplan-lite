@@ -33,6 +33,10 @@ export type Campaign = {
   minSpendKurus: number;
   rewardKind: "sabit" | "oran";
   repeatReward?: boolean;
+  transactionMinKurus?: number;
+  transactionMaxExclusiveKurus?: number;
+  requiredTransactions?: number;
+  separateDays?: boolean;
   /** Tekrar modelinde ilk kaç uygun işlem ödülsüz. */
   skipTransactions?: number;
   participationFeeKurus?: number;
@@ -63,4 +67,16 @@ export type UserDoc = {
   joined: Record<string, boolean>;
   onboarded: boolean;
   consentVersion: number;
+  planMonth?: string;
+  planChoices?: { campaignId: string; cardId: string; amountKurus: number }[];
+};
+
+export type CampaignProgress = {
+  id: string;
+  season: string;
+  campaignId: string;
+  cardId: string;
+  category: CategorySlug;
+  entries: { amountKurus: number; day: string }[];
+  totalKurus: number;
 };

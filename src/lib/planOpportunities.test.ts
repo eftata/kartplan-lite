@@ -99,19 +99,14 @@ describe("merchant budget reservations", () => {
       640_000,
     );
   });
-  it("deducts a coffee budget from the general restaurant campaign", () => {
+  it("does not stack selected coffee and general restaurant rewards in the same customer pool", () => {
     const { plan } = planWithReservations(input, [
       { campaignId: "96dc683fd2e5628c", cardId: "bonus-genc", amountKurus: 90_000 },
     ]);
     expect(plan.outcomes.find((o) => o.campaign.id === "96dc683fd2e5628c")?.rewardKurus).toBe(
       15_000,
     );
-    expect(plan.outcomes.find((o) => o.campaign.id === "1bf42a025092a1c8")?.spentKurus).toBe(
-      60_000,
-    );
-    expect(plan.outcomes.find((o) => o.campaign.id === "1bf42a025092a1c8")?.rewardKurus).toBe(
-      8_000,
-    );
+    expect(plan.outcomes.find((o) => o.campaign.id === "1bf42a025092a1c8")).toBeUndefined();
   });
   it("rejects oversubscription, wrong issuer and sub-threshold reservations", () => {
     const over = planWithReservations(input, [

@@ -10,6 +10,7 @@ import { Campaigns } from "./pages/Campaigns";
 import { Explore } from "./pages/Explore";
 import { MyCards } from "./pages/MyCards";
 import { Onboarding } from "./pages/Onboarding";
+import { League } from "./pages/League";
 import { Plan } from "./pages/Plan";
 import { Privacy } from "./pages/Privacy";
 import { Profile } from "./pages/Profile";
@@ -18,6 +19,7 @@ import { Spend } from "./pages/Spend";
 
 const PAGES: Record<string, () => JSX.Element> = {
   "/plan": Plan,
+  "/lig": League,
   "/kampanyalar": Campaigns,
   "/hesapla": Calculator,
   "/kartlarim": MyCards,

@@ -6,6 +6,7 @@ import { useApp } from "../lib/store";
 const NAV = [
   { href: "/plan", label: "Plan", icon: "◎" },
   { href: "/kesfet", label: "Kampanyalar", icon: "✦" },
+  { href: "/lig", label: "Lig", icon: "♜" },
   { href: "/hesapla", label: "Hesapla", icon: "±" },
   { href: "/kartlarim", label: "Kartlarım", icon: "▭" },
   { href: "/harcama", label: "Harcamam", icon: "◑" },

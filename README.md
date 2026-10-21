@@ -128,3 +128,21 @@ menüde **Yönetim** çıkar. Oradan:
 Banka sitelerinden otomatik kampanya toplama, LLM ayıklama, e-posta/push bildirimleri, harcama
 takibi ve ekstre içe aktarma. Bunlar sunucu (Cloud Functions, Blaze plan) ister; ihtiyaç olursa
 `lib/optimizer.ts` ve veri modeli değişmeden eklenebilir.
+
+## Aylık hedefler ve Kampanya Ligi
+
+- Plan ekranı kategori başına tüm uygun hesaplama kurallarını gösterir. Farklı kartlara bütçe
+  payı ayrılabilir; toplam sektör sınırı aşılmaz. Aynı müşteri ödül havuzu iki kez sayılmaz.
+- `campaignTargets.ts` ilk ödül ve üst ödül eşiklerini hesaplar. `campaignProgress.ts` işlem
+  sayısı, işlem tutarı ve farklı gün koşullarını beyan edilen kayıtlara uygular. Bu kayıtlar
+  banka/POS doğrulaması değildir. Hesaplama modeli bulunmayan fırsatlar ayrı açıklamayla görünür.
+- Aylık seçimler kullanıcı profilinde, harcama ilerlemesi `campaignProgress`, görevler
+  `gameMonths` alt koleksiyonlarında kullanıcıya özel saklanır.
+- Lig katılımı isteğe bağlıdır. Herkese açık `leaderboards/{ay}/players` yalnızca takma ad,
+  görev puanı ve güncelleme zamanı taşır. Görev puanları sabittir; harcama miktarı puan sağlamaz.
+  Firestore kuralları puan formülünü, görev ön koşullarını ve atomik public/private eşleşmesini
+  denetler. Ay/gün sınırı sunucu saatinden Türkiye saatiyle belirlenir.
+- `npm test` saf hesaplama testlerini çalıştırır. Java 21+ kurulu ortamda `npm run test:rules`
+  demo projesindeki yerel Firestore emülatöründe erişim, sahte puan ve veri gizliliği testlerini
+  çalıştırır; üretim verisine yazmaz. Test yardımcısının Firebase peer sürüm sınırı için
+  `.npmrc` içindeki uyumluluk ayarı kullanılır.

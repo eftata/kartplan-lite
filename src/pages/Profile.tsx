@@ -2,7 +2,7 @@ import { deleteUser, signOut } from "firebase/auth";
 import { useState } from "react";
 import { PageHead } from "../components/Layout";
 import { fb } from "../firebase";
-import { deleteUserData } from "../lib/data";
+import { deleteUserData, exportExtraData } from "../lib/data";
 import { Link } from "../lib/router";
 import { useSession } from "../lib/store";
 
@@ -11,23 +11,30 @@ export function Profile() {
   const [confirm, setConfirm] = useState(false);
   const [msg, setMsg] = useState("");
 
-  function exportData() {
-    const data = {
-      email: user.email,
-      cards: myCards.map((c) => ({ id: c.id, name: c.name, bank: c.bank })),
-      spendKurus: profile.spend,
-      joinedCampaigns: Object.keys(profile.joined),
-      consentVersion: profile.consentVersion,
-      exportedAt: new Date().toISOString(),
-    };
-    const url = URL.createObjectURL(
-      new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "kartplan-verilerim.json";
-    a.click();
-    URL.revokeObjectURL(url);
+  async function exportData() {
+    try {
+      const extra = await exportExtraData(user.uid);
+      const data = {
+        ...extra,
+        profile,
+        email: user.email,
+        cards: myCards.map((c) => ({ id: c.id, name: c.name, bank: c.bank })),
+        spendKurus: profile.spend,
+        joinedCampaigns: Object.keys(profile.joined),
+        consentVersion: profile.consentVersion,
+        exportedAt: new Date().toISOString(),
+      };
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
+      );
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "kartplan-verilerim.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setMsg("Veriler indirilemedi. Tekrar dene.");
+    }
   }
 
   async function removeAccount() {
@@ -63,7 +70,8 @@ export function Profile() {
         <h2>Verilerin ve gizlilik</h2>
         <p className="muted">
           Saklanan: seçtiğin kart türleri, aylık harcama profilin, katıldığını işaretlediğin
-          kampanyalar. <Link href="/aydinlatma">Aydınlatma metni</Link>
+          kampanyalar, plan seçimlerin, harcama ilerlemen ve aylık görev puanların. Lige katılırsan
+          takma adın ve puanın herkese açık olur. <Link href="/aydinlatma">Aydınlatma metni</Link>
         </p>
         <div className="row-actions">
           <button type="button" className="btn btn-ghost" onClick={exportData}>

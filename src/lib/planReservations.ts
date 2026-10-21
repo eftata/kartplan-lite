@@ -22,18 +22,19 @@ export function planWithReservations(
   const accepted: PlanReservation[] = [];
   const issues: string[] = [];
   const ids = new Set<string>();
+  const pools = new Set<string>();
   for (const reservation of reservations) {
     const campaign = input.campaigns.find(
-      (c) =>
-        c.id === reservation.campaignId &&
-        c.scenarioOnly &&
-        !c.demo &&
-        isActiveThisMonth(c, input.today),
+      (c) => c.id === reservation.campaignId && !c.demo && isActiveThisMonth(c, input.today),
     );
     const card =
       campaign && eligibleCards(campaign, input.cards).find((c) => c.id === reservation.cardId);
     if (!campaign || !card || campaign.category === "tumu" || ids.has(campaign.id)) {
       issues.push("Seçili kampanya veya kart uygun değil.");
+      continue;
+    }
+    if (campaign.calculationGroup && pools.has(campaign.calculationGroup)) {
+      issues.push(`${campaign.title}: aynı müşteri ödül havuzundan bir kampanya zaten seçildi.`);
       continue;
     }
     const cat = campaign.category;
@@ -52,6 +53,7 @@ export function planWithReservations(
     }
     spend[cat] = (spend[cat] ?? 0) - amount;
     ids.add(campaign.id);
+    if (campaign.calculationGroup) pools.add(campaign.calculationGroup);
     accepted.push(reservation);
     outcomes.push({
       campaign,
@@ -66,7 +68,12 @@ export function planWithReservations(
   const remaining = optimize({
     ...input,
     spend,
-    campaigns: input.campaigns.filter((c) => !c.scenarioOnly),
+    campaigns: input.campaigns.filter(
+      (c) =>
+        !c.scenarioOnly &&
+        !ids.has(c.id) &&
+        (!c.calculationGroup || !pools.has(c.calculationGroup)),
+    ),
   });
   const lines = [...remaining.lines];
   let baseKurus = remaining.baseKurus;

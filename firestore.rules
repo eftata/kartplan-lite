@@ -16,10 +16,12 @@ service cloud.firestore {
     }
 
     function validUser(d) {
-      return d.keys().hasOnly(['cardIds', 'spend', 'joined', 'onboarded', 'consentVersion', 'updatedAt'])
+      return d.keys().hasOnly(['cardIds', 'spend', 'joined', 'onboarded', 'consentVersion', 'updatedAt', 'planMonth', 'planChoices'])
         && (!('cardIds' in d) || (d.cardIds is list && d.cardIds.size() <= 30))
         && (!('spend' in d) || (d.spend is map && d.spend.size() <= 20))
         && (!('joined' in d) || (d.joined is map && d.joined.size() <= 500))
+        && (!('planMonth' in d) || (d.planMonth is string && d.planMonth.matches('^[0-9]{4}-[0-9]{2}$')))
+        && (!('planChoices' in d) || (d.planChoices is list && d.planChoices.size() <= 50))
         && (!('onboarded' in d) || d.onboarded is bool)
         && (!('consentVersion' in d) || d.consentVersion is int);
     }
@@ -37,6 +39,93 @@ service cloud.firestore {
     match /users/{uid} {
       allow read, delete: if signedIn() && request.auth.uid == uid;
       allow create, update: if signedIn() && request.auth.uid == uid && validUser(request.resource.data);
+    }
+
+
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    function localTime() { return request.time + duration.value(3, 'h'); }
+    function pad(n) { return n < 10 ? '0' + string(n) : string(n); }
+    function currentSeason() { return string(localTime().year()) + '-' + pad(localTime().month()); }
+    function currentDay() { return currentSeason() + '-' + pad(localTime().day()); }
+    function taskPoints(t) {
+      return (t.get('wallet', false) == true ? 50 : 0)
+       + (t.get('budget', false) == true ? 75 : 0)
+       + (t.get('plan', false) == true ? 75 : 0)
+       + (t.get('conditions', false) == true ? 25 : 0)
+       + (t.get('join', false) == true ? 50 : 0)
+       + (t.get('progress', false) == true ? 100 : 0);
+    }
+    function prerequisite(uid, season, d, old) {
+      let p = get(/databases/$(database)/documents/users/$(uid)).data;
+      return (!d.tasks.get('wallet', false) || old.get('wallet', false) || p.cardIds.size() > 0)
+       && (!d.tasks.get('budget', false) || old.get('budget', false)
+        || p.spend.get('market', 0) > 0 || p.spend.get('akaryakit', 0) > 0
+        || p.spend.get('e-ticaret', 0) > 0 || p.spend.get('restoran', 0) > 0
+        || p.spend.get('giyim', 0) > 0 || p.spend.get('seyahat', 0) > 0
+        || p.spend.get('elektronik', 0) > 0 || p.spend.get('fatura', 0) > 0)
+       && (!d.tasks.get('plan', false) || old.get('plan', false) || (p.get('planMonth', '') == season && p.get('planChoices', []).size() > 0))
+       && (!d.tasks.get('join', false) || old.get('join', false) || p.joined.values().hasAny([true]))
+       && (!d.tasks.get('progress', false) || old.get('progress', false)
+        || (get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.season == season
+         && get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.totalKurus > 0));
+    }
+    function validGame(uid, season, d, old) {
+      return season == currentSeason()
+       && d.keys().hasOnly(['tasks', 'checkins', 'score', 'optIn', 'nickname', 'progressId', 'updatedAt'])
+       && d.tasks is map && d.checkins is map && d.score is int && d.optIn is bool
+       && d.nickname is string && d.nickname.size() <= 24 && (!d.optIn || d.nickname.size() >= 2)
+       && d.progressId is string && d.progressId.size() <= 200 && d.updatedAt == request.time
+       && d.tasks.keys().hasOnly(['wallet','budget','plan','conditions','join','progress'])
+       && d.tasks.values().hasOnly([true]) && d.checkins.values().hasOnly([true])
+       && d.tasks.diff(old.get('tasks', {})).removedKeys().size() == 0
+       && d.tasks.diff(old.get('tasks', {})).changedKeys().size() == 0
+       && d.checkins.diff(old.get('checkins', {})).removedKeys().size() == 0
+       && d.checkins.diff(old.get('checkins', {})).changedKeys().size() == 0
+       && d.checkins.diff(old.get('checkins', {})).addedKeys().hasOnly([currentDay()])
+       && d.checkins.size() <= 31
+       && d.score == taskPoints(d.tasks) + d.checkins.size() * 10
+       && prerequisite(uid, season, d, old.get('tasks', {}))
+       && (d.optIn || !existsAfter(/databases/$(database)/documents/leaderboards/$(season)/players/$(uid)))
+       && (!d.optIn || (getAfter(/databases/$(database)/documents/leaderboards/$(season)/players/$(uid)).data.score == d.score
+        && getAfter(/databases/$(database)/documents/leaderboards/$(season)/players/$(uid)).data.nickname == d.nickname));
+    }
+    match /users/{uid}/gameMonths/{season} {
+      allow read, delete: if owner(uid);
+      allow create: if owner(uid) && validGame(uid, season, request.resource.data, {});
+      allow update: if owner(uid) && validGame(uid, season, request.resource.data, resource.data);
+    }
+    function validProgress(uid, id, d, old) {
+      let n = d.entries.size();
+      let last = d.entries[n - 1];
+      return d.keys().hasOnly(['season','campaignId','cardId','category','entries','totalKurus','updatedAt'])
+       && d.season == currentSeason() && id == d.season + '_' + d.campaignId
+       && d.campaignId is string && d.campaignId.size() <= 180
+       && d.cardId in get(/databases/$(database)/documents/users/$(uid)).data.cardIds
+       && d.category in ['market','akaryakit','e-ticaret','restoran','giyim','seyahat','elektronik','fatura']
+       && d.entries is list && n > 0 && n <= 100
+       && n == old.get('entries', []).size() + 1
+       && d.entries == old.get('entries', []).concat([last])
+       && last.keys().hasOnly(['amountKurus','day']) && last.amountKurus is int
+       && last.amountKurus > 0 && last.amountKurus <= 1000000000 && last.day is string && last.day.matches('^' + currentSeason() + '-(0[1-9]|[12][0-9]|3[01])$') && last.day <= currentDay()
+       && d.totalKurus is int && d.totalKurus == old.get('totalKurus', 0) + last.amountKurus
+       && d.updatedAt == request.time
+       && (!('cardId' in old) || (d.cardId == old.cardId && d.category == old.category && d.campaignId == old.campaignId));
+    }
+    match /users/{uid}/campaignProgress/{id} {
+      allow read, delete: if owner(uid);
+      allow create: if owner(uid) && validProgress(uid, id, request.resource.data, {});
+      allow update: if owner(uid) && validProgress(uid, id, request.resource.data, resource.data);
+    }
+    match /leaderboards/{season}/players/{uid} {
+      allow read: if true;
+      allow create, update: if owner(uid) && season == currentSeason()
+       && request.resource.data.keys().hasOnly(['nickname','score','updatedAt'])
+       && request.resource.data.updatedAt == request.time
+       && getAfter(/databases/$(database)/documents/users/$(uid)/gameMonths/$(season)).data.optIn == true
+       && request.resource.data.nickname == getAfter(/databases/$(database)/documents/users/$(uid)/gameMonths/$(season)).data.nickname
+       && request.resource.data.score == getAfter(/databases/$(database)/documents/users/$(uid)/gameMonths/$(season)).data.score;
+      allow delete: if owner(uid) && (!existsAfter(/databases/$(database)/documents/users/$(uid)/gameMonths/$(season))
+       || getAfter(/databases/$(database)/documents/users/$(uid)/gameMonths/$(season)).data.optIn == false);
     }
 
     match /admins/{uid} {
