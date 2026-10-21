@@ -33,10 +33,11 @@ export function Privacy() {
         <h2>Hakların</h2>
         <p>Profil sayfasından verilerini indirebilir ve hesabını tamamen silebilirsin.</p>
         <p>
-          Plan seçimleri, beyan ettiğin kampanya harcamaları ve aylık görev puanların hesabında
-          saklanır. Aylık lige katılım isteğe bağlıdır; yalnızca seçtiğin takma ad ve puanın herkese
-          açık gösterilir. Kart ve harcama bilgilerin paylaşılmaz. Ligden ayrılabilir, profilinden
-          verilerini indirebilir veya hesabınla birlikte silebilirsin.
+          Plan seçimleri, aylık kampanya katılımların, onayladığın koşullar, beyan ettiğin kampanya
+          harcamaları (tarih, tutar ve mağaza adı), hesaplanan hedef kazanımları ve aylık görev
+          puanların hesabında saklanır. Aylık lige katılım isteğe bağlıdır; yalnızca seçtiğin takma
+          ad ve puanın herkese açık gösterilir. Kart ve harcama bilgilerin paylaşılmaz. Ligden
+          ayrılabilir, profilinden verilerini indirebilir veya hesabınla birlikte silebilirsin.
         </p>
       </article>
     </div>

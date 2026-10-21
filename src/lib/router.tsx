@@ -3,11 +3,16 @@ import { type AnchorHTMLAttributes, useEffect, useState } from "react";
 const EVENT = "kp:navigate";
 
 export function navigate(to: string, replace = false) {
-  if (to === location.pathname + location.search) return;
+  if (to === location.pathname + location.search + location.hash) return;
   if (replace) history.replaceState(null, "", to);
   else history.pushState(null, "", to);
   window.dispatchEvent(new Event(EVENT));
-  window.scrollTo({ top: 0 });
+  requestAnimationFrame(() => {
+    const hash = location.hash.slice(1);
+    const target = hash ? document.getElementById(decodeURIComponent(hash)) : null;
+    if (target) target.scrollIntoView({ block: "start" });
+    else window.scrollTo({ top: 0 });
+  });
 }
 
 export function usePath(): { path: string; search: URLSearchParams } {

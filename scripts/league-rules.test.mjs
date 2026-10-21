@@ -91,7 +91,7 @@ describe.skipIf(!enabled)("private goals and monthly league security", () => {
     b.delete(pub);
     await assertSucceeds(b.commit());
   });
-  it("allows append-only self-reported progress and blocks access from others", async () => {
+  it("keeps legacy progress private and rejects unchecked new entries", async () => {
     const ref = doc(db, `users/alice/campaignProgress/${season}_offer`);
     const value = {
       season,
@@ -102,21 +102,11 @@ describe.skipIf(!enabled)("private goals and monthly league security", () => {
       totalKurus: 1000,
       updatedAt: serverTimestamp(),
     };
-    await assertSucceeds(setDoc(ref, value));
+    await assertFails(setDoc(ref, value));
+    await env.withSecurityRulesDisabled(async (context) =>
+      setDoc(doc(context.firestore(), ref.path), value),
+    );
+    await assertSucceeds(getDoc(ref));
     await assertFails(getDoc(doc(env.authenticatedContext("bob").firestore(), ref.path)));
-    await assertFails(setDoc(ref, { ...value, totalKurus: 50000 }));
-    await assertSucceeds(
-      setDoc(ref, {
-        ...value,
-        entries: [...value.entries, { amountKurus: 2000, day }],
-        totalKurus: 3000,
-      }),
-    );
-    await assertSucceeds(
-      setDoc(
-        doc(db, `users/alice/gameMonths/${season}`),
-        game({ tasks: { progress: true }, score: 100, progressId: `${season}_offer` }),
-      ),
-    );
   });
 });

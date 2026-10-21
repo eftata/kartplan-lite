@@ -70,8 +70,9 @@ export function Profile() {
         <h2>Verilerin ve gizlilik</h2>
         <p className="muted">
           Saklanan: seçtiğin kart türleri, aylık harcama profilin, katıldığını işaretlediğin
-          kampanyalar, plan seçimlerin, harcama ilerlemen ve aylık görev puanların. Lige katılırsan
-          takma adın ve puanın herkese açık olur. <Link href="/aydinlatma">Aydınlatma metni</Link>
+          kampanyalar, plan seçimlerin, kampanya katılımların, işlem tarihi/tutarı/mağazası, harcama
+          ilerlemen ve aylık görev puanların. Lige katılırsan takma adın ve puanın herkese açık
+          olur. <Link href="/aydinlatma">Aydınlatma metni</Link>
         </p>
         <div className="row-actions">
           <button type="button" className="btn btn-ghost" onClick={exportData}>

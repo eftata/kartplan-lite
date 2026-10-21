@@ -23,7 +23,8 @@
     "participationFeeKurus": 9999,
     "calculationGroup": "bonus-market",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "sameDayMerchantOnce": true
   },
   {
     "id": "b5b10e76121c9e8a",
@@ -285,7 +286,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-market",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "sameDayMerchantOnce": true
   },
   {
     "id": "1bf42a025092a1c8",
@@ -310,7 +312,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-restoran",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "sameDayMerchantOnce": true
   },
   {
     "id": "d784e63c165a1c2d",
@@ -335,7 +338,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-giyim",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "sameDayMerchantOnce": true
   },
   {
     "id": "1de094369c858fad",
@@ -378,7 +382,8 @@
     "reviewedAt": "2026-10-21",
     "transactionMinKurus": 160000,
     "requiredTransactions": 4,
-    "separateDays": true
+    "separateDays": true,
+    "merchantPattern": ".*(petrol[ ]*of[iı]s[iı]).*"
   },
   {
     "id": "96dc683fd2e5628c",
@@ -419,7 +424,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-restoran",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "merchantPattern": ".*coffy.*"
   },
   {
     "id": "1ae241b39cb5c59b",
@@ -459,7 +465,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-restoran",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "merchantPattern": ".*starbucks.*"
   },
   {
     "id": "937b24b53617a771",
@@ -499,7 +506,8 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-market",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "merchantPattern": ".*m[iı]gros[ ]*hemen.*"
   },
   {
     "id": "2ab94dfd20738513",
@@ -540,7 +548,8 @@
     "calculationGroup": "bonus-restoran",
     "planningOnly": true,
     "reviewedAt": "2026-10-21",
-    "separateDays": true
+    "separateDays": true,
+    "merchantPattern": ".*(trendyol[ ]*go|get[iı]r[ ]*yemek).*"
   },
   {
     "id": "f74c365c5dbabf06",
@@ -579,6 +588,7 @@
     "participationFeeKurus": 0,
     "calculationGroup": "bonus-fatura",
     "planningOnly": true,
-    "reviewedAt": "2026-10-21"
+    "reviewedAt": "2026-10-21",
+    "merchantPattern": ".*[iı]cloud.*"
   }
 ]

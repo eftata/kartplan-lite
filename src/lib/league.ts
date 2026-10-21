@@ -35,6 +35,12 @@ export const MISSIONS = [
     description: "Bu ayki kampanyalarından birine harcama kaydı ekle.",
     points: 100,
   },
+  {
+    id: "complete",
+    title: "İlk kampanyanı tamamla",
+    description: "Katıldığın bir kampanyanın seçtiğin hedefini uygun işlemlerle tamamla.",
+    points: 150,
+  },
 ] as const;
 export type MissionId = (typeof MISSIONS)[number]["id"];
 export type LeagueMonth = {

@@ -37,6 +37,8 @@ export type Campaign = {
   transactionMaxExclusiveKurus?: number;
   requiredTransactions?: number;
   separateDays?: boolean;
+  sameDayMerchantOnce?: boolean;
+  merchantPattern?: string;
   /** Tekrar modelinde ilk kaç uygun işlem ödülsüz. */
   skipTransactions?: number;
   participationFeeKurus?: number;
@@ -77,6 +79,30 @@ export type CampaignProgress = {
   campaignId: string;
   cardId: string;
   category: CategorySlug;
-  entries: { amountKurus: number; day: string }[];
+  entries: CampaignEntry[];
+  qualifiedTotalKurus?: number;
+  qualifiedCount?: number;
+  qualificationKeys?: Record<string, boolean>;
+  effectiveKurus?: number;
+  earnedKurus?: number;
+  completed?: boolean;
   totalKurus: number;
+};
+
+export type CampaignEnrollment = {
+  id: string;
+  season: string;
+  campaignId: string;
+  cardId: string;
+  category: CategorySlug;
+  targetKurus: number;
+  joinDay: string;
+  conditionsAccepted: true;
+  bankJoined: boolean;
+};
+export type CampaignEntry = {
+  amountKurus: number;
+  day: string;
+  merchant?: string;
+  conditionsConfirmed?: boolean;
 };

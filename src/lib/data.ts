@@ -1,3 +1,4 @@
+import { entryProblem, nextJourneyProgress } from "./campaignJourney";
 import { EMPTY_LEAGUE, leagueScore } from "./league";
 // Firestore erişimi tek dosyada. Koleksiyonlar:
 //   cards/{id}       katalog (herkes okur, admin yazar)
@@ -109,11 +110,15 @@ export async function setJoined(uid: string, campaignId: string, joined: boolean
 }
 
 export async function exportExtraData(uid: string) {
-  const [games, progress] = await Promise.all([
+  const [games, progress, enrollments, months] = await Promise.all([
     getDocs(collection(fb().db, "users", uid, "gameMonths")),
     getDocs(collection(fb().db, "users", uid, "campaignProgress")),
+    getDocs(collection(fb().db, "users", uid, "campaignEnrollments")),
+    getDocs(collection(fb().db, "users", uid, "campaignMonths")),
   ]);
   return {
+    campaignMonths: months.docs.map((d) => ({ id: d.id, ...d.data() })),
+    campaignEnrollments: enrollments.docs.map((d) => ({ id: d.id, ...d.data() })),
     gameMonths: games.docs.map((d) => ({ id: d.id, ...d.data() })),
     campaignProgress: progress.docs.map((d) => ({ id: d.id, ...d.data() })),
   };
@@ -128,6 +133,10 @@ export async function deleteUserData(uid: string) {
   }
   const progress = await getDocs(collection(fb().db, "users", uid, "campaignProgress"));
   for (const item of progress.docs) await deleteDoc(item.ref);
+  const enrollments = await getDocs(collection(fb().db, "users", uid, "campaignEnrollments"));
+  for (const item of enrollments.docs) await deleteDoc(item.ref);
+  const months = await getDocs(collection(fb().db, "users", uid, "campaignMonths"));
+  for (const month of months.docs) await deleteDoc(month.ref);
   await deleteDoc(doc(fb().db, "users", uid));
 }
 
@@ -190,29 +199,90 @@ export function watchProgress(
     onError,
   );
 }
-export async function addProgress(
+export function watchEnrollments(
   uid: string,
   season: string,
-  campaign: Campaign,
-  cardId: string,
-  amountKurus: number,
-  day: string,
+  cb: (items: import("./types").CampaignEnrollment[]) => void,
+  onError: (e: Error) => void,
 ) {
-  if (campaign.category === "tumu" || !Number.isSafeInteger(amountKurus) || amountKurus <= 0)
-    throw new Error("Geçersiz tutar.");
-  const ref = doc(fb().db, "users", uid, "campaignProgress", `${season}_${campaign.id}`);
+  return onSnapshot(
+    query(collection(fb().db, "users", uid, "campaignEnrollments"), where("season", "==", season)),
+    (snap) =>
+      cb(snap.docs.map((d) => ({ ...d.data(), id: d.id }) as import("./types").CampaignEnrollment)),
+    onError,
+  );
+}
+export async function startTracking(
+  uid: string,
+  value: import("./types").CampaignEnrollment,
+  choices: UserDoc["planChoices"],
+) {
+  const { id, ...data } = value;
+  const ref = doc(fb().db, "users", uid, "campaignEnrollments", id);
   await runTransaction(fb().db, async (tx) => {
-    const snap = await tx.get(ref);
-    const old = snap.exists() ? snap.data() : { entries: [], totalKurus: 0 };
-    tx.set(ref, {
-      season,
-      campaignId: campaign.id,
-      cardId,
-      category: campaign.category,
-      entries: [...old.entries, { amountKurus, day }],
-      totalKurus: old.totalKurus + amountKurus,
+    const monthRef = doc(fb().db, "users", uid, "campaignMonths", value.season);
+    const [old, month, model] = await Promise.all([
+      tx.get(ref),
+      tx.get(monthRef),
+      tx.get(doc(fb().db, "trackingRules", value.campaignId)),
+    ]);
+    if (old.exists()) throw new Error("Bu kampanya zaten takibinde.");
+    if (!model.exists())
+      throw new Error("Bu kampanyanın sayısal takip kuralı henüz yayımlanmamış.");
+    const previous = month.exists() ? month.data() : { allocations: {}, pools: {}, count: 0 };
+    const pool = model.data().poolKey;
+    if (previous.pools[pool])
+      throw new Error("Aynı müşteri ödül havuzundan bir kampanya zaten takibinde.");
+    tx.set(monthRef, {
+      season: value.season,
+      allocations: {
+        ...previous.allocations,
+        [value.category]: (previous.allocations[value.category] ?? 0) + value.targetKurus,
+      },
+      pools: { ...previous.pools, [pool]: value.campaignId },
+      count: previous.count + 1,
+      lastCampaignId: value.campaignId,
       updatedAt: serverTimestamp(),
     });
+    tx.set(ref, { ...data, updatedAt: serverTimestamp() });
+    tx.set(
+      doc(fb().db, "users", uid),
+      {
+        planMonth: value.season,
+        planChoices: choices,
+        ...(value.bankJoined ? { joined: { [value.campaignId]: true } } : {}),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  });
+}
+export async function addJourneyEntry(
+  uid: string,
+  campaign: Campaign,
+  card: CatalogCard,
+  season: string,
+  entry: import("./types").CampaignEntry,
+  today: string,
+) {
+  const id = `${season}_${campaign.id}`;
+  const ref = doc(fb().db, "users", uid, "campaignProgress", id);
+  const enrollmentRef = doc(fb().db, "users", uid, "campaignEnrollments", id);
+  await runTransaction(fb().db, async (tx) => {
+    const [enrolled, previous] = await Promise.all([tx.get(enrollmentRef), tx.get(ref)]);
+    if (!enrolled.exists()) throw new Error("Önce kampanya koşullarını onaylayıp takibe al.");
+    const enrollment = { ...enrolled.data(), id } as import("./types").CampaignEnrollment;
+    if (enrollment.cardId !== card.id)
+      throw new Error("Kampanyaya katıldığın kartla işlem kaydet.");
+    const old = previous.exists()
+      ? ({ ...previous.data(), id } as import("./types").CampaignProgress)
+      : undefined;
+    const clean = { ...entry, merchant: entry.merchant?.trim().toLocaleLowerCase("tr") };
+    const problem = entryProblem(campaign, enrollment, clean, old, today);
+    if (problem) throw new Error(problem);
+    const { id: ignored, ...value } = nextJourneyProgress(campaign, card, enrollment, old, clean);
+    void ignored;
+    tx.set(ref, { ...value, updatedAt: serverTimestamp() });
   });
 }
 export function watchLeague(
@@ -249,6 +319,7 @@ export async function updateLeague(
   season: string,
   action: {
     task?: import("./league").MissionId;
+    tasks?: import("./league").MissionId[];
     checkin?: string;
     optIn?: boolean;
     nickname?: string;
@@ -262,7 +333,11 @@ export async function updateLeague(
     const old = snapshot.exists()
       ? (snapshot.data() as import("./league").LeagueMonth)
       : { ...EMPTY_LEAGUE };
-    const tasks = { ...old.tasks, ...(action.task ? { [action.task]: true } : {}) };
+    const tasks = {
+      ...old.tasks,
+      ...Object.fromEntries((action.tasks ?? []).map((id) => [id, true])),
+      ...(action.task ? { [action.task]: true } : {}),
+    };
     const checkins = { ...old.checkins, ...(action.checkin ? { [action.checkin]: true } : {}) };
     const value = {
       tasks,

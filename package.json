@@ -14,7 +14,7 @@
     "deploy:ci": "bash scripts/deploy.sh",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:rules": "npx --yes firebase-tools@15.34.0 emulators:exec --only firestore --project demo-kartplan \"vitest run scripts/league-rules.test.mjs\""
+    "test:rules": "npx --yes firebase-tools@15.34.0 emulators:exec --only firestore --project demo-kartplan \"vitest run scripts/league-rules.test.mjs scripts/journey-rules.test.mjs\""
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",

@@ -1,11 +1,13 @@
 import { type ReactNode } from "react";
+import { JourneyProvider } from "../lib/journeyStore";
+import { JourneySummary } from "./JourneySummary";
 import { Brand } from "./Brand";
 import { Link, usePath } from "../lib/router";
 import { useApp } from "../lib/store";
 
 const NAV = [
   { href: "/plan", label: "Plan", icon: "◎" },
-  { href: "/kesfet", label: "Kampanyalar", icon: "✦" },
+  { href: "/kampanyalar", label: "Kampanyalar", icon: "✦" },
   { href: "/lig", label: "Lig", icon: "♜" },
   { href: "/hesapla", label: "Hesapla", icon: "±" },
   { href: "/kartlarim", label: "Kartlarım", icon: "▭" },
@@ -13,6 +15,13 @@ const NAV = [
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
+  return (
+    <JourneyProvider>
+      <MemberLayout>{children}</MemberLayout>
+    </JourneyProvider>
+  );
+}
+function MemberLayout({ children }: { children: ReactNode }) {
   const { path } = usePath();
   const { admin, user, error } = useApp();
   const initial = (user?.displayName || user?.email || "?").slice(0, 1).toLocaleUpperCase("tr");
@@ -47,7 +56,10 @@ export function Layout({ children }: { children: ReactNode }) {
           Veriye ulaşılamadı: {error}
         </div>
       )}
-      <main className="page">{children}</main>
+      <main className="page">
+        <JourneySummary />
+        {children}
+      </main>
       <nav className="tabbar" aria-label="Alt menü">
         {NAV.map((n) => (
           <Link key={n.href} href={n.href} className={path === n.href ? "active" : undefined}>

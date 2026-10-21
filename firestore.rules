@@ -53,7 +53,8 @@ service cloud.firestore {
        + (t.get('plan', false) == true ? 75 : 0)
        + (t.get('conditions', false) == true ? 25 : 0)
        + (t.get('join', false) == true ? 50 : 0)
-       + (t.get('progress', false) == true ? 100 : 0);
+       + (t.get('progress', false) == true ? 100 : 0)
+       + (t.get('complete', false) == true ? 150 : 0);
     }
     function prerequisite(uid, season, d, old) {
       let p = get(/databases/$(database)/documents/users/$(uid)).data;
@@ -67,7 +68,10 @@ service cloud.firestore {
        && (!d.tasks.get('join', false) || old.get('join', false) || p.joined.values().hasAny([true]))
        && (!d.tasks.get('progress', false) || old.get('progress', false)
         || (get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.season == season
-         && get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.totalKurus > 0));
+         && get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.get('qualifiedCount',0) > 0))
+       && (!d.tasks.get('complete', false) || old.get('complete', false)
+        || (get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.get('completed',false) == true
+         && get(/databases/$(database)/documents/users/$(uid)/campaignProgress/$(d.progressId)).data.get('earnedKurus',0) > 0));
     }
     function validGame(uid, season, d, old) {
       return season == currentSeason()
@@ -75,7 +79,7 @@ service cloud.firestore {
        && d.tasks is map && d.checkins is map && d.score is int && d.optIn is bool
        && d.nickname is string && d.nickname.size() <= 24 && (!d.optIn || d.nickname.size() >= 2)
        && d.progressId is string && d.progressId.size() <= 200 && d.updatedAt == request.time
-       && d.tasks.keys().hasOnly(['wallet','budget','plan','conditions','join','progress'])
+       && d.tasks.keys().hasOnly(['wallet','budget','plan','conditions','join','progress','complete'])
        && d.tasks.values().hasOnly([true]) && d.checkins.values().hasOnly([true])
        && d.tasks.diff(old.get('tasks', {})).removedKeys().size() == 0
        && d.tasks.diff(old.get('tasks', {})).changedKeys().size() == 0
@@ -94,19 +98,100 @@ service cloud.firestore {
       allow create: if owner(uid) && validGame(uid, season, request.resource.data, {});
       allow update: if owner(uid) && validGame(uid, season, request.resource.data, resource.data);
     }
-    function validProgress(uid, id, d, old) {
-      let n = d.entries.size();
-      let last = d.entries[n - 1];
-      return d.keys().hasOnly(['season','campaignId','cardId','category','entries','totalKurus','updatedAt'])
+
+    match /trackingRules/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    function smaller(a,b) { return a < b ? a : b; }
+    function positive(a) { return a > 0 ? a : 0; }
+    function gross(r, amount) {
+      return amount < r.minSpendKurus || amount <= 0 ? 0
+        : r.repeatReward ? smaller(positive(math.floor(amount / r.minSpendKurus)-r.skipTransactions)*r.rewardKurus,r.capKurus)
+        : r.rewardKind == 'sabit' ? r.rewardKurus
+        : r.capKurus > 0 ? smaller(math.floor(amount * r.rateBps / 10000),r.capKurus) : math.floor(amount * r.rateBps / 10000);
+    }
+    function net(r,amount,cardId) { return positive(gross(r,amount)-(cardId in r.feeCardIds ? r.participationFeeKurus : 0)); }
+    function effective(r,count,total) {return r.repeatReward ? count*r.minSpendKurus : r.requiredTransactions > 0 ? smaller(count,r.requiredTransactions)*r.transactionMinKurus : total;}
+    function validDay(day, season) {return day is string && day.matches('^' + season + '-(0[1-9]|[12][0-9]|3[01])$') && day <= currentDay();}
+    function allocationBefore(uid,season) {
+      return exists(/databases/$(database)/documents/users/$(uid)/campaignMonths/$(season))
+        ? get(/databases/$(database)/documents/users/$(uid)/campaignMonths/$(season)).data : {};
+    }
+    function validMonth(uid,season,d,old) {
+      let r=get(/databases/$(database)/documents/trackingRules/$(d.lastCampaignId)).data;
+      let id=season+'_'+d.lastCampaignId;
+      let e=getAfter(/databases/$(database)/documents/users/$(uid)/campaignEnrollments/$(id)).data;
+      return season == currentSeason() && d.season == season
+       && d.keys().hasOnly(['season','allocations','pools','count','lastCampaignId','updatedAt'])
+       && !exists(/databases/$(database)/documents/users/$(uid)/campaignEnrollments/$(id))
+       && e.category == r.category && e.season == season
+       && d.allocations is map && d.allocations.diff(old.get('allocations',{})).affectedKeys().hasOnly([e.category])
+       && d.allocations[e.category] == old.get('allocations',{}).get(e.category,0) + e.targetKurus
+       && d.allocations[e.category] <= get(/databases/$(database)/documents/users/$(uid)).data.spend.get(e.category,0)
+       && d.pools is map && d.pools.diff(old.get('pools',{})).affectedKeys().hasOnly([r.poolKey])
+       && old.get('pools',{}).get(r.poolKey,'') == '' && d.pools[r.poolKey] == e.campaignId
+       && d.count == old.get('count',0)+1 && d.count <= 50 && d.updatedAt == request.time;
+    }
+    match /users/{uid}/campaignMonths/{season} {
+      allow read,delete: if owner(uid);
+      allow create: if owner(uid) && validMonth(uid,season,request.resource.data,{});
+      allow update: if owner(uid) && validMonth(uid,season,request.resource.data,resource.data);
+    }
+    function validEnrollment(uid,id,d) {
+      let r=get(/databases/$(database)/documents/trackingRules/$(d.campaignId)).data;
+      let p=get(/databases/$(database)/documents/users/$(uid)).data;
+      return d.keys().hasOnly(['season','campaignId','cardId','category','targetKurus','joinDay','conditionsAccepted','bankJoined','updatedAt'])
        && d.season == currentSeason() && id == d.season + '_' + d.campaignId
-       && d.campaignId is string && d.campaignId.size() <= 180
-       && d.cardId in get(/databases/$(database)/documents/users/$(uid)).data.cardIds
-       && d.category in ['market','akaryakit','e-ticaret','restoran','giyim','seyahat','elektronik','fatura']
-       && d.entries is list && n > 0 && n <= 100
-       && n == old.get('entries', []).size() + 1
+       && r.status == 'yayinda' && r.startsAt <= currentDay() && r.endsAt >= currentDay()
+       && d.cardId in r.cardIds && d.cardId in p.cardIds && d.category == r.category
+       && d.conditionsAccepted == true && d.bankJoined is bool && (!r.requiresJoin || d.bankJoined)
+       && validDay(d.joinDay,d.season) && d.joinDay >= r.startsAt && d.joinDay <= r.endsAt
+       && d.targetKurus is int && d.targetKurus > 0 && d.targetKurus <= p.spend.get(d.category,0)
+       && net(r,d.targetKurus,d.cardId) > 0
+       && (!r.repeatReward || d.targetKurus % r.minSpendKurus == 0)
+       && (r.rewardKind != 'sabit' || r.repeatReward || d.targetKurus == r.minSpendKurus)
+       && getAfter(/databases/$(database)/documents/users/$(uid)/campaignMonths/$(d.season)).data.allocations[d.category] == allocationBefore(uid,d.season).get('allocations',{}).get(d.category,0)+d.targetKurus
+       && getAfter(/databases/$(database)/documents/users/$(uid)/campaignMonths/$(d.season)).data.pools[r.poolKey] == d.campaignId
+       && d.updatedAt == request.time;
+    }
+    match /users/{uid}/campaignEnrollments/{id} {
+      allow read, delete: if owner(uid);
+      allow create: if owner(uid) && validEnrollment(uid,id,request.resource.data);
+      // The target and enrollment date are fixed after consent. Deletion remains available for privacy.
+      allow update: if false;
+    }
+    function validProgress(uid, id, d, old) {
+      let r=get(/databases/$(database)/documents/trackingRules/$(d.campaignId)).data;
+      let e=get(/databases/$(database)/documents/users/$(uid)/campaignEnrollments/$(id)).data;
+      let last=d.entries[d.entries.size()-1];
+      let key=r.separateDays ? last.day : last.day + '|' + last.merchant;
+      let count=old.get('qualifiedCount',0)+1;
+      let total=old.get('qualifiedTotalKurus',0)+last.amountKurus;
+      let eff=effective(r,count,total);
+      return d.keys().hasOnly(['season','campaignId','cardId','category','entries','totalKurus','qualifiedTotalKurus','qualifiedCount','qualificationKeys','effectiveKurus','earnedKurus','completed','updatedAt'])
+       && d.season == currentSeason() && id == d.season + '_' + d.campaignId
+       && d.season == e.season && d.campaignId == e.campaignId && d.cardId == e.cardId && d.category == e.category
+       && d.cardId in get(/databases/$(database)/documents/users/$(uid)).data.cardIds && d.cardId in r.cardIds
+       && r.status == 'yayinda' && last.day >= r.startsAt && last.day <= r.endsAt
+       && (!r.requiresJoin || (e.bankJoined && last.day >= e.joinDay)) && e.conditionsAccepted == true
+       && !old.get('completed',false)
+       && d.entries is list && d.entries.size() > 0 && d.entries.size() <= 100
+       && d.entries.size() == old.get('entries', []).size() + 1
        && d.entries == old.get('entries', []).concat([last])
-       && last.keys().hasOnly(['amountKurus','day']) && last.amountKurus is int
-       && last.amountKurus > 0 && last.amountKurus <= 1000000000 && last.day is string && last.day.matches('^' + currentSeason() + '-(0[1-9]|[12][0-9]|3[01])$') && last.day <= currentDay()
+       && last.keys().hasOnly(['amountKurus','day','merchant','conditionsConfirmed'])
+       && last.amountKurus is int && last.amountKurus > 0 && last.amountKurus <= 1000000000
+       && last.amountKurus >= r.transactionMinKurus
+       && (r.transactionMaxExclusiveKurus == 0 || last.amountKurus < r.transactionMaxExclusiveKurus)
+       && validDay(last.day,d.season) && last.merchant is string && last.merchant.size() >= 2 && last.merchant.size() <= 80
+       && last.conditionsConfirmed == true && last.merchant.matches(r.merchantPattern)
+       && (!(r.separateDays || r.sameDayMerchantOnce) || !old.get('qualificationKeys',{}).get(key,false))
+       && d.qualificationKeys is map && d.qualificationKeys.size() <= 100
+       && d.qualificationKeys.diff(old.get('qualificationKeys',{})).affectedKeys().hasOnly([key])
+       && d.qualificationKeys.get(key,false) == true
+       && d.qualifiedCount == count && d.qualifiedTotalKurus == total && d.effectiveKurus == eff
+       && d.completed == (eff >= e.targetKurus)
+       && d.earnedKurus == (d.completed ? net(r,smaller(eff,e.targetKurus),d.cardId) : 0)
        && d.totalKurus is int && d.totalKurus == old.get('totalKurus', 0) + last.amountKurus
        && d.updatedAt == request.time
        && (!('cardId' in old) || (d.cardId == old.cardId && d.category == old.category && d.campaignId == old.campaignId));

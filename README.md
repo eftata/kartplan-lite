@@ -146,3 +146,22 @@ takibi ve ekstre içe aktarma. Bunlar sunucu (Cloud Functions, Blaze plan) ister
   demo projesindeki yerel Firestore emülatöründe erişim, sahte puan ve veri gizliliği testlerini
   çalıştırır; üretim verisine yazmaz. Test yardımcısının Firebase peer sürüm sınırı için
   `.npmrc` içindeki uyumluluk ayarı kullanılır.
+
+### Birleşik kampanya akışı
+
+Üye menüsündeki Kampanyalar, `/kampanyalar` üzerinden kişisel kampanya merkezini açar.
+Plan hedef seçer; kampanya merkezi aylık katılımı ve uygun işlemleri kaydeder; Lig aynı kayıtlar
+üzerinden görev puanlarını otomatik ekler. Tüm üye sayfalarının üstündeki özet aynı canlı veriyi
+kullanır. Potansiyel, takibe alınan hedeflerin net ödülüdür. Kazanım, seçilmiş hedef tamamlanana
+kadar sıfır kalır. Bu hesap banka ekstresi/yükleme teyidi değildir.
+
+- `campaignEnrollments`: kart, hedef, koşul onayı ve banka katılım tarihi; yalnızca sahibi okur.
+- `campaignProgress`: sadece kabul edilen yeni işlemlerden türetilen uygun işlem adedi/tutarı,
+  hedef ilerlemesi ve tamamlanan net kazanım. Eski, koşulları teyitsiz kayıtlar kazanıma sayılmaz.
+- `trackingRules`: herkese okunabilir, yalnızca yönetici/IAM yetkisiyle yazılabilir kontrol
+  edilmiş kampanya kuralları. Firestore kuralları kart/tarih/tutar/onay ve mükerrer işlem
+  koşullarını, net ödülü, hedef tamamlanmasını ve tamamlama görevi puanını burada doğrular.
+- İncelenen sayısal kuralları dağıtım için `node scripts/export-tracking-rules.mjs` ile JSON
+  olarak çıkar. Bu modelleri proje yöneticisi yetkisiyle `trackingRules/{id}` belgelerine yükle.
+  Yeni sayısal kuralların istemci paketi ve bu koleksiyonda birlikte yayımlanması gerekir.
+  Modeli olmayan banka fırsatları detaylarıyla görünür; kazanım hesaplamasına eklenmez.

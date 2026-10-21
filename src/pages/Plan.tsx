@@ -8,7 +8,6 @@ import { PageHead } from "../components/Layout";
 import { CardLabel } from "../components/MiniCard";
 import { rewardText } from "../components/CampaignItem";
 import { categoryIcon, categoryName } from "../lib/categories";
-import { setJoined } from "../lib/data";
 import { daysBetween, formatDay, monthName } from "../lib/dates";
 import { formatKurus } from "../lib/money";
 import { bestSingleCard, eligibleCards, isActiveThisMonth, optimize } from "../lib/optimizer";
@@ -17,7 +16,7 @@ import { useSession } from "../lib/store";
 import type { CategorySlug } from "../lib/types";
 
 export function Plan() {
-  const { user, profile, myCards, planCampaigns: campaigns, today, catalog } = useSession();
+  const { profile, myCards, planCampaigns: campaigns, today, catalog } = useSession();
   const { external, loading } = useCampaignFeed(today);
   const [reservations, setReservations] = useState<PlanReservation[]>(
     profile.planMonth === today.slice(0, 7) ? (profile.planChoices ?? []) : [],
@@ -192,13 +191,9 @@ export function Plan() {
                       {formatDay(o.campaign.endsAt, today)}'e kadar
                     </small>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-soft"
-                    onClick={() => setJoined(user.uid, o.campaign.id, true)}
-                  >
-                    Katıldım
-                  </button>
+                  <Link className="btn btn-soft" href={`/kampanyalar?campaign=${o.campaign.id}`}>
+                    Katılımı ve hedefi aç ↗
+                  </Link>
                 </li>
               ))}
             </ul>

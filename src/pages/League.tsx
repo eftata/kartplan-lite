@@ -1,46 +1,31 @@
 import { useEffect, useState } from "react";
 import { PageHead } from "../components/Layout";
-import { updateLeague, watchLeague, watchLeaders, watchProgress } from "../lib/data";
-import {
-  EMPTY_LEAGUE,
-  MISSIONS,
-  leagueLevel,
-  scoreRank,
-  type LeagueMonth,
-  type Leader,
-  type MissionId,
-} from "../lib/league";
+import { updateLeague, watchLeaders } from "../lib/data";
+import { MISSIONS, leagueLevel, scoreRank, type Leader, type MissionId } from "../lib/league";
 import { useSession } from "../lib/store";
 import { monthName } from "../lib/dates";
 import { Link } from "../lib/router";
-import type { CampaignProgress } from "../lib/types";
+import { useJourney } from "../lib/journeyStore";
 
 export function League() {
   const { user, profile, today } = useSession();
   const season = today.slice(0, 7);
-  const [game, setGame] = useState<LeagueMonth>(EMPTY_LEAGUE);
+
   const [leaders, setLeaders] = useState<Leader[]>([]);
-  const [progress, setProgress] = useState<CampaignProgress[]>([]);
+  const { progress, enrollments, totals, game } = useJourney();
   const [nickname, setNickname] = useState("");
-  const [reviewed, setReviewed] = useState(false);
+
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
-  useEffect(
-    () => watchLeague(user.uid, season, setGame, (e) => setMessage(e.message)),
-    [user.uid, season],
-  );
   useEffect(() => watchLeaders(season, setLeaders, (e) => setMessage(e.message)), [season]);
-  useEffect(
-    () => watchProgress(user.uid, season, setProgress, (e) => setMessage(e.message)),
-    [user.uid, season],
-  );
   const ready: Record<MissionId, boolean> = {
     wallet: profile.cardIds.length > 0,
     budget: Object.values(profile.spend).some((v) => (v ?? 0) > 0),
     plan: profile.planMonth === season && !!profile.planChoices?.length,
-    conditions: reviewed,
-    join: Object.values(profile.joined).some(Boolean),
-    progress: progress.some((p) => p.totalKurus > 0),
+    conditions: enrollments.length > 0,
+    join: enrollments.some((e) => e.bankJoined),
+    progress: progress.some((p) => (p.qualifiedCount ?? 0) > 0),
+    complete: progress.some((p) => p.completed && (p.earnedKurus ?? 0) > 0),
   };
   async function act(action: Parameters<typeof updateLeague>[2]) {
     setBusy(true);
@@ -58,7 +43,7 @@ export function League() {
   return (
     <>
       <PageHead kicker={monthName(today)} title="Kampanya Ligi">
-        Planını hazırla, koşulları kontrol et, ilerlemeni takip et. Her ay yeni bir yarış.
+        Kampanya akışını tamamladıkça görev puanların otomatik eklenir. Her ay yeni bir sezon.
       </PageHead>
       <section className="league-hero">
         <div>
@@ -90,6 +75,31 @@ export function League() {
           </p>
         </div>
       </section>
+      <section className="league-path">
+        <div>
+          <span className="kicker">Bu ayın rotası</span>
+          <h2>Katıl, ilerle, tamamla.</h2>
+          <p>
+            {enrollments.length} katılım ·{" "}
+            {progress.filter((p) => (p.qualifiedCount ?? 0) > 0).length} ilerleyen hedef ·{" "}
+            {totals.completed} tamamlanan kampanya
+          </p>
+        </div>
+        <div>
+          <b>
+            {Object.keys(game.tasks).length} / {MISSIONS.length} görev
+          </b>
+          <progress max={MISSIONS.length} value={Object.keys(game.tasks).length} />
+          <span className="small">
+            {game.score >= 450
+              ? "En üst seviyedesin"
+              : `Sıradaki seviyeye ${game.score < 100 ? 100 - game.score : game.score < 250 ? 250 - game.score : 450 - game.score} puan kaldı`}
+          </span>
+        </div>
+        <Link className="btn btn-soft" href="/kampanyalar?stage=active">
+          Kampanyaları ilerlet ↗
+        </Link>
+      </section>
       <div className="league-layout">
         <section>
           <h2>Aylık görevlerin</h2>
@@ -100,15 +110,21 @@ export function League() {
                   <span className="kicker">+{m.points} puan</span>
                   <h3>{m.title}</h3>
                   <p>{m.description}</p>
-                  {m.id === "conditions" && !game.tasks.conditions && (
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={reviewed}
-                        onChange={(e) => setReviewed(e.target.checked)}
-                      />{" "}
-                      Kampanya koşullarını gözden geçirdim.
-                    </label>
+                  {!game.tasks[m.id] && !ready[m.id] && (
+                    <Link
+                      className="mission-next"
+                      href={
+                        m.id === "wallet"
+                          ? "/kartlarim"
+                          : m.id === "budget"
+                            ? "/harcama"
+                            : m.id === "plan"
+                              ? "/plan"
+                              : "/kampanyalar"
+                      }
+                    >
+                      Göreve git ↗
+                    </Link>
                   )}
                 </div>
                 <button
@@ -117,8 +133,14 @@ export function League() {
                   onClick={() =>
                     act({
                       task: m.id,
-                      ...(m.id === "progress"
-                        ? { progressId: progress.find((p) => p.totalKurus > 0)!.id }
+                      ...(m.id === "progress" || m.id === "complete"
+                        ? {
+                            progressId: progress.find((p) =>
+                              m.id === "complete"
+                                ? p.completed && (p.earnedKurus ?? 0) > 0
+                                : (p.qualifiedCount ?? 0) > 0,
+                            )!.id,
+                          }
                         : {}),
                     })
                   }

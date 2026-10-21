@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CATEGORIES } from "../lib/categories";
-import { recordedProgress } from "../lib/campaignProgress";
 import { campaignTargets } from "../lib/campaignTargets";
-import { addProgress, saveUser, watchProgress } from "../lib/data";
+import { saveUser } from "../lib/data";
 import { formatKurus, parseTlInput } from "../lib/money";
 import { eligibleCards, isActiveThisMonth } from "../lib/optimizer";
 import { planWithReservations, type PlanReservation } from "../lib/planReservations";
 import { useSession } from "../lib/store";
 import type { Campaign, CampaignProgress } from "../lib/types";
 import { CardLabel } from "./MiniCard";
+import { useJourney } from "../lib/journeyStore";
 import { Link } from "../lib/router";
 
 export function GoalBoard({
@@ -20,13 +20,9 @@ export function GoalBoard({
 }) {
   const { user, profile, myCards, planCampaigns: campaigns, today } = useSession();
   const season = today.slice(0, 7);
-  const [progress, setProgress] = useState<CampaignProgress[]>([]);
+  const { progress } = useJourney();
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  useEffect(
-    () => watchProgress(user.uid, season, setProgress, (e) => setMessage(e.message)),
-    [user.uid, season],
-  );
   const input = { cards: myCards, spend: profile.spend, campaigns, joined: profile.joined, today };
   function choose(r: PlanReservation) {
     const next = [...reservations.filter((x) => x.campaignId !== r.campaignId), r];
@@ -52,19 +48,6 @@ export function GoalBoard({
       setMessage("Plan kaydedilemedi. Tekrar dene.");
     } finally {
       setBusy(false);
-    }
-  }
-  async function record(c: Campaign, cardId: string, amount: string, day: string) {
-    const k = parseTlInput(amount);
-    if (!k) {
-      setMessage("Pozitif bir harcama tutarı gir.");
-      return;
-    }
-    try {
-      await addProgress(user.uid, season, c, cardId, k, day);
-      setMessage("Harcama kaydedildi. Ayrı gün ve işlem koşullarını ayrıca kontrol et.");
-    } catch {
-      setMessage("Harcama kaydedilemedi. Bağlantını ve seçili kartını kontrol et.");
     }
   }
   return (
@@ -130,9 +113,10 @@ export function GoalBoard({
                     selected={selected}
                     spent={recorded?.totalKurus ?? 0}
                     entries={recorded?.entries ?? []}
+                    effectiveKurus={recorded?.effectiveKurus ?? 0}
+                    qualifiedCount={recorded?.qualifiedCount ?? 0}
                     choose={choose}
                     remove={() => onChange(reservations.filter((r) => r.campaignId !== c.id))}
-                    record={record}
                   />
                 );
               })}
@@ -170,9 +154,10 @@ function GoalOption({
   selected,
   spent,
   entries,
+  effectiveKurus,
+  qualifiedCount,
   choose,
   remove,
-  record,
 }: {
   campaign: Campaign;
   cards: ReturnType<typeof eligibleCards>;
@@ -180,19 +165,17 @@ function GoalOption({
   selected?: PlanReservation;
   spent: number;
   entries: CampaignProgress["entries"];
+  effectiveKurus: number;
+  qualifiedCount: number;
   choose: (r: PlanReservation) => void;
   remove: () => void;
-  record: (c: Campaign, id: string, a: string, day: string) => Promise<void>;
 }) {
   const [cardId, setCardId] = useState(selected?.cardId ?? cards[0]!.id);
   const [amount, setAmount] = useState("");
-  const [expense, setExpense] = useState("");
-  const { today } = useSession();
-  const [expenseDay, setExpenseDay] = useState(today);
   const [confirmed, setConfirmed] = useState(false);
-  const [recording, setRecording] = useState(false);
   const card = cards.find((x) => x.id === cardId) ?? cards[0]!;
-  const tracked = recordedProgress(c, entries);
+  const tracked = { effectiveKurus, qualifyingTransactions: qualifiedCount };
+  void entries;
   const t = campaignTargets(c, card, Math.max(0, budget), tracked.effectiveKurus);
   const target = selected?.amountKurus ?? t.suggestedKurus;
   return (
@@ -317,40 +300,10 @@ function GoalOption({
             Hedefe kalan {formatKurus(Math.max(0, target - tracked.effectiveKurus))} · İlk ödüle
             kalan {formatKurus(t.missingFirstKurus)}
           </p>
-          <label>
-            Uygun işlem tutarı (₺)
-            <input
-              inputMode="decimal"
-              value={expense}
-              onChange={(e) => setExpense(e.target.value)}
-            />
-          </label>
-          <label>
-            İşlem günü
-            <input
-              type="date"
-              min={`${today.slice(0, 7)}-01`}
-              max={today}
-              value={expenseDay}
-              onChange={(e) => setExpenseDay(e.target.value)}
-            />
-          </label>
           <div className="row-actions">
-            <button
-              className="btn btn-soft"
-              disabled={recording}
-              onClick={async () => {
-                setRecording(true);
-                try {
-                  await record(c, selected.cardId, expense, expenseDay);
-                  setExpense("");
-                } finally {
-                  setRecording(false);
-                }
-              }}
-            >
-              Harcamayı kaydet
-            </button>
+            <Link className="btn btn-primary" href={`/kampanyalar?campaign=${c.id}`}>
+              Katılım ve harcama takibine git ↗
+            </Link>
             <button className="btn btn-ghost" onClick={remove}>
               Plandan çıkar
             </button>
