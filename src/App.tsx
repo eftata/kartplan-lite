@@ -11,6 +11,8 @@ import { Explore } from "./pages/Explore";
 import { MyCards } from "./pages/MyCards";
 import { Onboarding } from "./pages/Onboarding";
 import { League } from "./pages/League";
+import { Home } from "./pages/Home";
+import { Tracking } from "./pages/Tracking";
 import { Plan } from "./pages/Plan";
 import { Privacy } from "./pages/Privacy";
 import { Profile } from "./pages/Profile";
@@ -18,6 +20,8 @@ import { SignIn } from "./pages/SignIn";
 import { Spend } from "./pages/Spend";
 
 const PAGES: Record<string, () => JSX.Element> = {
+  "/ana-sayfa": Home,
+  "/takip": Tracking,
   "/plan": Plan,
   "/lig": League,
   "/kampanyalar": Campaigns,
@@ -38,7 +42,7 @@ export function App() {
 
   useEffect(() => {
     if (!authReady) return;
-    if (user && (path === "/" || path === "/giris")) navigate("/plan", true);
+    if (user && (path === "/" || path === "/giris")) navigate("/ana-sayfa", true);
     if (!user && (PAGES[path] || path === "/admin" || path === "/baslangic"))
       navigate("/giris", true);
   }, [authReady, user, path]);
@@ -56,7 +60,7 @@ export function App() {
     );
   }
   if (needsOnboarding) return <Onboarding />;
-  const Page = PAGES[path] ?? Plan;
+  const Page = PAGES[path] ?? Home;
   return (
     <Layout>
       <Page />

@@ -165,3 +165,16 @@ kadar sıfır kalır. Bu hesap banka ekstresi/yükleme teyidi değildir.
   olarak çıkar. Bu modelleri proje yöneticisi yetkisiyle `trackingRules/{id}` belgelerine yükle.
   Yeni sayısal kuralların istemci paketi ve bu koleksiyonda birlikte yayımlanması gerekir.
   Modeli olmayan banka fırsatları detaylarıyla görünür; kazanım hesaplamasına eklenmez.
+
+### Üye alanındaki sayfalar
+
+- `/ana-sayfa`: giriş sonrası kişisel ana sayfa; kartlar, seçili plan ve takip özeti.
+- `/plan`: üç aşamalı plan oluşturucu: bütçe/kartlar → kampanya seçimi → kart ve harcama özeti.
+  Bir kampanya seçilince sahip olunan uygun kart otomatik atanır. İlk ödül hedefi veya kalan
+  bütçeyle ulaşılabilir hedef seçilebilir. Seçim, bankadaki kampanya katılımı anlamına gelmez.
+- `/kampanyalar`: güncel fırsatları keşfetme ve hesaplanabilir olanları plana ekleme.
+- `/takip`: seçilen kampanyaların banka katılımı ve uygun harcamalarının kaydı.
+- `/lig`: yeni deneyim hazırlanana kadar “Çok yakında”. Eski kayıtlar korunur; üye arayüzü
+  otomatik lig puanı yazmaz ve sıralama yayımlamaz.
+
+Tüm üye sayfalarında kişisel ana sayfaya dönüş vardır. Genel site `/kesfet` adresinde kalır.

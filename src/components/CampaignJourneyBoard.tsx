@@ -18,18 +18,37 @@ const STAGES = [
   { id: "completed", label: "Tamamlanan" },
   { id: "all", label: "Tümü" },
 ];
-export function CampaignJourneyBoard() {
+export function CampaignJourneyBoard({ trackingOnly = false }: { trackingOnly?: boolean }) {
   const { rows, loading, error } = useJourney();
-  const { profile } = useSession();
+  const { profile, today } = useSession();
+  const planned = new Set(
+    profile.planMonth === today.slice(0, 7)
+      ? (profile.planChoices ?? []).map((r) => r.campaignId)
+      : [],
+  );
+  const stages = trackingOnly
+    ? [
+        { id: "all", label: "Planımdakiler" },
+        ...STAGES.filter((s) => ["joined", "active", "completed"].includes(s.id)),
+      ]
+    : STAGES;
   const { search } = usePath();
   const selected = search.get("campaign");
-  const requested = search.get("stage") ?? "eligible";
-  const stage = STAGES.some((s) => s.id === requested) ? requested : "eligible";
+  const requested = search.get("stage") ?? (trackingOnly ? "all" : "eligible");
+  const stage = stages.some((s) => s.id === requested)
+    ? requested
+    : trackingOnly
+      ? "all"
+      : "eligible";
   const [category, setCategory] = useState("");
   const [query, setQuery] = useState("");
   const filtered = rows
     .filter(
       (r) =>
+        (!trackingOnly ||
+          r.enrollment ||
+          planned.has(r.campaign.id) ||
+          r.campaign.id === selected) &&
         (!selected || r.campaign.id === selected) &&
         (!category || r.campaign.category === category) &&
         (!query ||
@@ -67,23 +86,25 @@ export function CampaignJourneyBoard() {
         </span>
       </div>
       <div className="journey-tabs" role="group" aria-label="Kampanya aşaması">
-        {STAGES.map((s) => (
+        {stages.map((s) => (
           <button
             className={stage === s.id && !selected ? "active" : ""}
             aria-pressed={stage === s.id && !selected}
             key={s.id}
-            onClick={() => navigate(`/kampanyalar?stage=${s.id}`)}
+            onClick={() => navigate(`/takip?stage=${s.id}`)}
           >
             {s.label}{" "}
             <b>
               {
-                rows.filter(
-                  (r) =>
-                    s.id === "all" ||
-                    (s.id === "joined" && r.enrollment) ||
-                    (s.id === "eligible" && r.state === "eligible") ||
-                    r.state === s.id,
-                ).length
+                rows
+                  .filter((r) => !trackingOnly || r.enrollment || planned.has(r.campaign.id))
+                  .filter(
+                    (r) =>
+                      s.id === "all" ||
+                      (s.id === "joined" && r.enrollment) ||
+                      (s.id === "eligible" && r.state === "eligible") ||
+                      r.state === s.id,
+                  ).length
               }
             </b>
           </button>
@@ -113,7 +134,7 @@ export function CampaignJourneyBoard() {
       </div>
       {selected && (
         <p>
-          <Link href="/kampanyalar?stage=all">← Bütün kampanyalarına dön</Link>
+          <Link href="/takip?stage=all">← Bütün kampanyalarına dön</Link>
         </p>
       )}
       {loading ? (
@@ -126,7 +147,7 @@ export function CampaignJourneyBoard() {
           <p>Önce kartlarını ve sektör bütçeni belirle; ardından uygun kampanyayı takibe al.</p>
           <Link href="/kartlarim">Kartlarım ↗</Link> ·{" "}
           <Link href="/harcama">Harcama sınırlarım ↗</Link> ·{" "}
-          <Link href="/kampanyalar?stage=all">Tüm aşamaları göster ↗</Link>
+          <Link href="/takip?stage=all">Tüm aşamaları göster ↗</Link>
         </div>
       ) : (
         <div className="journey-card-grid">
@@ -237,7 +258,7 @@ function JourneyCard({ row }: { row: JourneyRow }) {
       setMessage(
         "Katılım kaydedildi ve bütçe payın planına eklendi. Uygun harcamalarını burada takip edebilirsin.",
       );
-      navigate(`/kampanyalar?campaign=${c.id}`);
+      navigate(`/takip?campaign=${c.id}`);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Katılım kaydedilemedi.");
     } finally {
@@ -263,7 +284,7 @@ function JourneyCard({ row }: { row: JourneyRow }) {
     try {
       await addJourneyEntry(user.uid, c, card, season, entry, today);
       if (nextJourneyProgress(c, card, enrollment, p, entry).completed)
-        navigate(`/kampanyalar?campaign=${c.id}`);
+        navigate(`/takip?campaign=${c.id}`);
       setAmount("");
       setConfirmed(false);
       setMessage("Uygun harcama eklendi. Hedef tamamlandığında kazanım otomatik güncellenir.");
@@ -450,8 +471,8 @@ function JourneyCard({ row }: { row: JourneyRow }) {
             <div className="journey-complete">
               <b>✓ {formatKurus(row.earnedKurus)} kazanım özetine eklendi</b>
               <p>Seçtiğin hedef tamamlandı. Banka yüklemesini ayrıca teyit et.</p>
-              <Link className="btn btn-soft" href="/lig">
-                Tamamlama görevini ve lig puanını gör ↗
+              <Link className="btn btn-soft" href="/kampanyalar">
+                Diğer kampanyalarını keşfet ↗
               </Link>
             </div>
           ) : row.state === "expired" ? (
@@ -535,7 +556,7 @@ function JourneyCard({ row }: { row: JourneyRow }) {
           )}
           <div className="journey-card-links">
             <Link href="/plan">Plan dağılımı ↗</Link>
-            <Link href="/lig">Görevler ve lig ↗</Link>
+            <Link href="/kampanyalar">Yeni kampanyalar ↗</Link>
           </div>
         </div>
       )}

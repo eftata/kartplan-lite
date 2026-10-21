@@ -6,12 +6,11 @@ import { Link, usePath } from "../lib/router";
 import { useApp } from "../lib/store";
 
 const NAV = [
-  { href: "/plan", label: "Plan", icon: "◎" },
+  { href: "/ana-sayfa", label: "Ana sayfa", icon: "⌂" },
+  { href: "/plan", label: "Plan oluştur", icon: "◎" },
   { href: "/kampanyalar", label: "Kampanyalar", icon: "✦" },
-  { href: "/lig", label: "Lig", icon: "♜" },
-  { href: "/hesapla", label: "Hesapla", icon: "±" },
+  { href: "/takip", label: "Takip", icon: "◔" },
   { href: "/kartlarim", label: "Kartlarım", icon: "▭" },
-  { href: "/harcama", label: "Harcamam", icon: "◑" },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -28,7 +27,7 @@ function MemberLayout({ children }: { children: ReactNode }) {
   return (
     <div className="shell">
       <header className="topbar">
-        <Link href="/plan" className="wordmark" aria-label="KartPlan ana sayfa">
+        <Link href="/ana-sayfa" className="wordmark" aria-label="KartPlan ana sayfa">
           <Brand />
         </Link>
         <nav className="topnav" aria-label="Ana menü">
@@ -37,6 +36,9 @@ function MemberLayout({ children }: { children: ReactNode }) {
               {n.label}
             </Link>
           ))}
+          <Link href="/lig" className={path === "/lig" ? "active" : "nav-soon"}>
+            Lig <small>yakında</small>
+          </Link>
           {admin && (
             <Link href="/admin" className={path === "/admin" ? "active" : undefined}>
               Yönetim
@@ -57,7 +59,17 @@ function MemberLayout({ children }: { children: ReactNode }) {
         </div>
       )}
       <main className="page">
-        <JourneySummary />
+        {path !== "/ana-sayfa" && (
+          <div className="member-breadcrumb">
+            <Link href="/ana-sayfa">← Ana sayfa</Link>
+            <span>
+              {path === "/lig"
+                ? "Kampanya Ligi"
+                : (NAV.find((n) => n.href === path)?.label ?? "Hesabım")}
+            </span>
+          </div>
+        )}
+        {path === "/takip" && <JourneySummary />}
         {children}
       </main>
       <nav className="tabbar" aria-label="Alt menü">

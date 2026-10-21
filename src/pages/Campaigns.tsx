@@ -1,217 +1,207 @@
-import { CampaignJourneyBoard } from "../components/CampaignJourneyBoard";
-import { Link } from "../lib/router";
-import { mixCampaigns } from "../lib/campaignOrder";
-import { categoryName } from "../lib/categories";
 import { useState } from "react";
-import { CampaignCard } from "../components/CampaignCard";
-import { CampaignItem } from "../components/CampaignItem";
-import { PageHead } from "../components/Layout";
-import { setJoined } from "../lib/data";
-import { CAMPAIGN_SOURCES } from "../lib/sources";
 import { useSession } from "../lib/store";
+import { useJourney } from "../lib/journeyStore";
 import { useCampaignFeed } from "../lib/useCampaignFeed";
-
+import { CampaignCard } from "../components/CampaignCard";
+import { Link } from "../lib/router";
+import { selectCampaign } from "../lib/planner";
+import { saveUser } from "../lib/data";
+import { eligibleCards } from "../lib/optimizer";
+import { categoryName } from "../lib/categories";
+import { rewardText } from "../components/CampaignItem";
+import { mixCampaigns } from "../lib/campaignOrder";
+import type { ExternalCampaign } from "../lib/externalCampaigns";
 export function Campaigns() {
-  const { user, profile, myCards, campaigns, planCampaigns, today } = useSession();
-  const { external, feed, loading } = useCampaignFeed(today);
-  const [scope, setScope] = useState("tumu");
-  const [program, setProgram] = useState("");
-  const [category, setCategory] = useState("");
+  const { user, profile, myCards, planCampaigns, today } = useSession();
+  const { enrollments } = useJourney();
+  const { external, loading } = useCampaignFeed(today);
+  const season = today.slice(0, 7);
+  const choices = profile.planMonth === season ? (profile.planChoices ?? []) : [];
   const [query, setQuery] = useState("");
-  const [joinedOnly, setJoinedOnly] = useState(false);
-  const [limit, setLimit] = useState(24);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState("");
-  const owned = new Set(myCards.map((c) => c.program));
+  const [category, setCategory] = useState("");
+  const [onlyMine, setOnlyMine] = useState(true);
+  const [limit, setLimit] = useState(18);
+  const [busy, setBusy] = useState("");
+  const [message, setMessage] = useState("");
   const current = external.filter((c) => !c.endsAt || c.endsAt >= today);
-  const categories = [...new Set(current.map((c) => c.category))].sort((a, b) =>
-    a.localeCompare(b, "tr"),
-  );
-  const needle = query.trim().toLocaleLowerCase("tr");
-  const rows = mixCampaigns(
-    current.filter(
+  const extras: ExternalCampaign[] = planCampaigns
+    .filter(
       (c) =>
-        (scope === "tumu" || owned.has(c.program)) &&
-        (!program || c.program === program) &&
+        !c.demo &&
+        c.status === "yayinda" &&
+        c.startsAt <= today &&
+        c.endsAt >= today &&
+        !current.some((e) => e.sourceUrl === c.url),
+    )
+    .map((c) => ({
+      id: c.id,
+      title: c.title,
+      program: c.program,
+      category: categoryName(c.category),
+      summary: c.summary,
+      benefit: rewardText(c),
+      endsAt: c.endsAt,
+      sourceUrl: c.url,
+    }));
+  const all = [...current, ...extras];
+  const programs = new Set(myCards.map((k) => k.program));
+  const rows = mixCampaigns(
+    all.filter(
+      (c) =>
+        (!onlyMine || programs.has(c.program)) &&
         (!category || c.category === category) &&
-        (!joinedOnly || profile.joined[c.id]) &&
-        (!needle ||
-          `${c.title} ${c.summary} ${c.category}`.toLocaleLowerCase("tr").includes(needle)),
+        (!query ||
+          `${c.title} ${c.summary}`
+            .toLocaleLowerCase("tr")
+            .includes(query.toLocaleLowerCase("tr"))),
     ),
   );
-  const managed = campaigns.filter(
-    (c) =>
-      !c.demo &&
-      c.status === "yayinda" &&
-      c.startsAt <= today &&
-      c.endsAt >= today &&
-      !current.some((e) => e.sourceUrl === c.url) &&
-      (scope === "tumu" || owned.has(c.program)) &&
-      (!category || c.category === "tumu" || categoryName(c.category) === category) &&
-      (!program || program === c.program) &&
-      (!needle || `${c.title} ${c.summary}`.toLocaleLowerCase("tr").includes(needle)) &&
-      (!joinedOnly || profile.joined[c.id]),
-  );
-  async function toggle(id: string) {
+  async function choose(id: string) {
+    const c = planCampaigns.find((c) => c.id === id);
+    if (!c) return;
     setBusy(id);
-    setError("");
+    setMessage("");
     try {
-      await setJoined(user.uid, id, !profile.joined[id]);
-    } catch {
-      setError("Katılım durumu kaydedilemedi. Tekrar dene.");
+      const locked = enrollments.some((e) => e.campaignId === id);
+      if (locked) return;
+      const next = choices.some((r) => r.campaignId === id)
+        ? choices.filter((r) => r.campaignId !== id)
+        : selectCampaign(c, myCards, profile.spend, planCampaigns, choices, today);
+      await saveUser(user.uid, { planMonth: season, planChoices: next });
+      setMessage(
+        next.some((r) => r.campaignId === id)
+          ? "Kampanya planına eklendi. Uygun kartın ve harcama payın otomatik atandı."
+          : "Kampanya plan seçiminden kaldırıldı.",
+      );
+    } catch (e) {
+      setMessage((e as Error).message);
     } finally {
-      setBusy(null);
+      setBusy("");
     }
   }
   return (
     <>
-      <PageHead kicker="Katılım → harcama → kazanım" title="Kampanya merkezim">
-        Kartlarına uygun fırsatları seç. Katılımını kaydet, koşullara uygun her işlemle hedefini
-        tamamla.
-      </PageHead>
-      <CampaignJourneyBoard />
-      <details className="all-bank-offers">
-        <summary>Tüm bankalardan diğer güncel kampanyaları incele</summary>
-        <div className="segmented" role="group" aria-label="Kampanya kapsamı">
-          <button
-            type="button"
-            aria-pressed={scope === "tumu"}
-            onClick={() => {
-              setScope("tumu");
-              setLimit(24);
-            }}
-          >
-            Tüm kampanyalar
-          </button>
-          <button
-            type="button"
-            aria-pressed={scope === "bana"}
-            onClick={() => {
-              setScope("bana");
-              setLimit(24);
-            }}
-          >
-            Kart programlarım
-          </button>
+      <div className="discovery-member-heading">
+        <div>
+          <span className="kicker">Keşfet ve karşılaştır</span>
+          <h1>Bir sonraki fırsatını bul.</h1>
+          <p>
+            Kampanyaları burada keşfet. Hesaplanabilen bir kampanyayı seçtiğinde uygun kartın ve
+            bütçe payın planına otomatik eklensin.
+          </p>
         </div>
-        <div className="filters">
-          <input
-            className="input"
-            type="search"
-            aria-label="Kampanya ara"
-            placeholder="Marka, fırsat veya sektör ara…"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setLimit(24);
-            }}
-          />
-          <select
-            className="input"
-            aria-label="Kart programı"
-            value={program}
-            onChange={(e) => {
-              setProgram(e.target.value);
-              setLimit(24);
-            }}
-          >
-            <option value="">Tüm programlar</option>
-            {CAMPAIGN_SOURCES.map((s) => (
-              <option key={s.program} value={s.program}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <select
-            className="input"
-            aria-label="Sektör"
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setLimit(24);
-            }}
-          >
-            <option value="">Tüm sektörler</option>
-            {categories.map((c) => (
+        <Link className="btn btn-primary" href="/plan?adim=3">
+          Seçimlerimle plan oluştur →
+        </Link>
+      </div>
+      <div className="browse-plan-note">
+        <span>
+          <b>{choices.length} kampanya</b> bu ayın planında
+        </span>
+        <Link href="/plan?adim=3">Planımı düzenle ↗</Link>
+        <Link href="/takip">Katılım ve harcama takibine git ↗</Link>
+      </div>
+      <div className="browse-controls">
+        <input
+          type="search"
+          aria-label="Kampanya ara"
+          placeholder="Marka, kampanya veya fırsat ara…"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setLimit(18);
+          }}
+        />
+        <select
+          aria-label="Sektör"
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setLimit(18);
+          }}
+        >
+          <option value="">Tüm sektörler</option>
+          {[...new Set(all.map((c) => c.category))]
+            .sort((a, b) => a.localeCompare(b, "tr"))
+            .map((c) => (
               <option key={c}>{c}</option>
             ))}
-          </select>
-          <label className="small">
-            <input
-              type="checkbox"
-              checked={joinedOnly}
-              onChange={(e) => {
-                setJoinedOnly(e.target.checked);
-                setLimit(24);
-              }}
-            />{" "}
-            Katıldıklarım
-          </label>
+        </select>
+        <label className="checkline">
+          <input
+            type="checkbox"
+            checked={onlyMine}
+            onChange={(e) => {
+              setOnlyMine(e.target.checked);
+              setLimit(18);
+            }}
+          />{" "}
+          Kart programlarımla ilişkili
+        </label>
+      </div>
+      {message && (
+        <div className="planner-message" role="status">
+          {message} <Link href="/plan?adim=3">Planıma git ↗</Link>
         </div>
-        <p className="muted small" role="status">
-          {loading ? "Banka listesi güncelleniyor…" : `${rows.length + managed.length} kampanya`}
-          {feed &&
-            ` · ${new Date(feed.updatedAt).toLocaleDateString("tr-TR", { timeZone: "Europe/Istanbul" })} güncellendi`}
-        </p>
-        {error && <p role="alert">{error}</p>}
-        <p className="muted small">
-          Program eşleşmesi, kartının kampanyaya kesin uygun olduğunu göstermez. Kart türü,
-          mağaza/POS ve katılım koşullarını detaylardan kontrol et. Planda yalnızca hesaplama kuralı
-          doğrulanan kampanyalar toplanır.
-        </p>
-        <div className="discovery-grid member-campaign-grid">
-          {rows.slice(0, limit).map((c) => (
-            <div key={c.id} className="member-campaign">
+      )}
+      <p className="muted small">
+        {loading ? "Kampanyalar güncelleniyor…" : `${rows.length} güncel fırsat`} · Kampanya seçimi,
+        bankadaki katılım yerine geçmez.
+      </p>
+      <div className="discovery-grid member-campaign-grid">
+        {rows.slice(0, limit).map((c) => {
+          const rule = planCampaigns.find((r) => r.id === c.id || r.url === c.sourceUrl);
+          const compatible = rule && eligibleCards(rule, myCards).length > 0;
+          const selected = rule && choices.find((r) => r.campaignId === rule.id);
+          const tracked = rule && enrollments.some((e) => e.campaignId === rule.id);
+          return (
+            <article className={`browse-campaign ${selected ? "in-plan" : ""}`} key={c.id}>
               <CampaignCard campaign={c} today={today} />
-              {planCampaigns.some((rule) => rule.id === c.id || rule.url === c.sourceUrl) ? (
-                <Link
-                  className="btn btn-soft"
-                  href={`/kampanyalar?campaign=${planCampaigns.find((rule) => rule.id === c.id || rule.url === c.sourceUrl)!.id}`}
-                >
-                  Katılım ve ilerleme takibini aç ↗
-                </Link>
-              ) : (
-                <>
-                  <p className="small muted">
-                    Sayısal takip kuralı henüz yok. Katılım notu kazanım toplamına eklenmez.
-                  </p>{" "}
+              <div className="browse-action">
+                {tracked ? (
+                  <Link className="btn btn-soft" href={`/takip?campaign=${rule!.id}`}>
+                    Takip ekranını aç →
+                  </Link>
+                ) : compatible ? (
                   <button
-                    type="button"
-                    className={`btn ${profile.joined[c.id] ? "btn-ghost" : "btn-soft"}`}
-                    disabled={busy !== null}
-                    aria-pressed={!!profile.joined[c.id]}
-                    onClick={() => void toggle(c.id)}
+                    className={`btn ${selected ? "btn-soft" : "btn-primary"}`}
+                    disabled={!!busy}
+                    onClick={() => choose(rule.id)}
                   >
-                    {busy === c.id
+                    {busy === rule.id
                       ? "Kaydediliyor…"
-                      : profile.joined[c.id]
-                        ? "Katıldım ✓ · geri al"
-                        : "Banka katılımımı not et"}
+                      : selected
+                        ? "✓ Planımda · seçimi kaldır"
+                        : "Planıma ekle · kartı otomatik ata"}
                   </button>
-                </>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <>
+                    <span className="small muted">
+                      {rule
+                        ? "Planlamak için uygun kartını ekle."
+                        : "Sayısal hesaplama kuralı henüz yok; koşulları inceleyebilirsin."}
+                    </span>
+                    {rule && <Link href="/kartlarim">Kartlarımı düzenle ↗</Link>}
+                  </>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+      {rows.length > limit && (
+        <button className="btn btn-soft" onClick={() => setLimit((n) => n + 18)}>
+          Daha fazla fırsat göster ({rows.length - limit})
+        </button>
+      )}
+      {!loading && !rows.length && (
+        <div className="empty">
+          Bu filtrelerde kampanya yok. Tüm programları görmek için kart filtresini kaldır.
         </div>
-        {rows.length > limit && (
-          <button type="button" className="btn btn-primary" onClick={() => setLimit((v) => v + 24)}>
-            Daha fazla kampanya göster ({rows.length - limit})
-          </button>
-        )}
-        {managed.map((c) => (
-          <CampaignItem
-            key={c.id}
-            campaign={c}
-            cards={myCards.filter((k) => k.program === c.program)}
-            uid={user.uid}
-            joined={!!profile.joined[c.id]}
-            today={today}
-          />
-        ))}
-        {!loading && !rows.length && !managed.length && (
-          <div className="empty">Bu filtrelere uyan kampanya bulunamadı.</div>
-        )}
-      </details>
+      )}
+      <Link className="planner-home-link" href="/ana-sayfa">
+        ← Ana sayfaya dön
+      </Link>
     </>
   );
 }

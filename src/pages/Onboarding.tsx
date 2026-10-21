@@ -32,7 +32,7 @@ export function Onboarding() {
         onboarded: true,
         consentVersion: CONSENT_VERSION,
       });
-      navigate("/plan", true);
+      navigate("/ana-sayfa", true);
     } catch {
       setErr("Kaydedilemedi. Bağlantını kontrol edip tekrar dene.");
       setBusy(false);
